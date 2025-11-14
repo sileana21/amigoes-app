@@ -1,5 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { auth } from './firebaseConfig';
+
 import {
     KeyboardAvoidingView,
     Platform,
@@ -10,14 +12,65 @@ import {
     View,
 } from 'react-native';
 
+import {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+} from 'firebase/auth';
+
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // For now this is just a fake handler
-  const handleLogin = () => {
-    // TODO: replace with real Firebase auth later
-    router.replace('/(tabs)');
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setError('Please enter email and password.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+      router.replace('/(tabs)');
+    } catch (e: any) {
+      console.log('Login error:', e);
+      if (e.code === 'auth/invalid-credential') {
+        setError('Invalid email or password.');
+      } else {
+        setError('Something went wrong. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignup = async () => {
+    if (!email || !password) {
+      setError('Please enter email and password.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await createUserWithEmailAndPassword(auth, email.trim(), password);
+      router.replace('/(tabs)');
+    } catch (e: any) {
+      console.log('Signup error:', e);
+      if (e.code === 'auth/email-already-in-use') {
+        setError('That email is already registered.');
+      } else if (e.code === 'auth/weak-password') {
+        setError('Password should be at least 6 characters.');
+      } else {
+        setError('Could not create account. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -52,8 +105,20 @@ export default function LoginScreen() {
           onChangeText={setPassword}
         />
 
-        <TouchableOpacity style={styles.primaryButton} onPress={handleLogin}>
-          <Text style={styles.primaryText}>Log In</Text>
+        {error && (
+          <Text style={styles.errorText}>
+            {error}
+          </Text>
+        )}
+
+        <TouchableOpacity
+          style={styles.primaryButton}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          <Text style={styles.primaryText}>
+            {loading ? 'Logging in...' : 'Log In'}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -63,11 +128,8 @@ export default function LoginScreen() {
           <Text style={styles.secondaryText}>Back to Onboarding</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.linkButton}
-          onPress={() => {}}
-        >
-          <Text style={styles.linkText}>Create an account (coming soon)</Text>
+        <TouchableOpacity style={styles.linkButton} onPress={handleSignup}>
+          <Text style={styles.linkText}>Create an account</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -141,4 +203,9 @@ const styles = StyleSheet.create({
     color: '#93c5fd',
     fontSize: 13,
   },
+  errorText: {
+    color: '#fca5a5',
+    marginTop: 8,
+  },
 });
+
