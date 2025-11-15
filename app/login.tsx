@@ -1,6 +1,5 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { auth } from './firebaseConfig';
 
 import {
     KeyboardAvoidingView,
@@ -16,6 +15,9 @@ import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
 } from 'firebase/auth';
+import { auth } from './firebaseConfig';
+
+import { createUserProfileIfMissing } from './userProfileService';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -23,6 +25,9 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // ---------------------------
+  // LOGIN
+  // ---------------------------
   const handleLogin = async () => {
     if (!email || !password) {
       setError('Please enter email and password.');
@@ -33,7 +38,15 @@ export default function LoginScreen() {
     setError(null);
 
     try {
-      await signInWithEmailAndPassword(auth, email.trim(), password);
+      const cred = await signInWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password
+      );
+
+      // 🔥 Ensure profile exists
+      await createUserProfileIfMissing(cred.user);
+
       router.replace('/(tabs)');
     } catch (e: any) {
       console.log('Login error:', e);
@@ -47,6 +60,9 @@ export default function LoginScreen() {
     }
   };
 
+  // ---------------------------
+  // SIGN UP
+  // ---------------------------
   const handleSignup = async () => {
     if (!email || !password) {
       setError('Please enter email and password.');
@@ -57,10 +73,19 @@ export default function LoginScreen() {
     setError(null);
 
     try {
-      await createUserWithEmailAndPassword(auth, email.trim(), password);
+      const cred = await createUserWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password
+      );
+
+      // 🔥 Create new user profile
+      await createUserProfileIfMissing(cred.user);
+
       router.replace('/(tabs)');
     } catch (e: any) {
       console.log('Signup error:', e);
+
       if (e.code === 'auth/email-already-in-use') {
         setError('That email is already registered.');
       } else if (e.code === 'auth/weak-password') {
@@ -73,6 +98,9 @@ export default function LoginScreen() {
     }
   };
 
+  // ---------------------------
+  // RENDER UI
+  // ---------------------------
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -105,11 +133,7 @@ export default function LoginScreen() {
           onChangeText={setPassword}
         />
 
-        {error && (
-          <Text style={styles.errorText}>
-            {error}
-          </Text>
-        )}
+        {error && <Text style={styles.errorText}>{error}</Text>}
 
         <TouchableOpacity
           style={styles.primaryButton}
@@ -136,6 +160,9 @@ export default function LoginScreen() {
   );
 }
 
+// ---------------------------
+// STYLES
+// ---------------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -208,4 +235,3 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 });
-

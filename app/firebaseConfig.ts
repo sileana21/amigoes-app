@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBasTPbNwA8XGqxW1wtqSg3T4JOjURCNLI",
@@ -16,4 +17,4 @@ const app = initializeApp(firebaseConfig);
 
 // 👇 THIS is the named export that login.tsx will import
 export const auth = getAuth(app);
-
+export const db = getFirestore(app);
