@@ -1,7 +1,20 @@
+
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { auth } from '../firebaseConfig';
 
 export default function ProfileScreen() {
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    const currentUser = auth.currentUser;
+    if (currentUser && currentUser.email) {
+      setUserEmail(currentUser.email);
+    }
+  }, []);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
@@ -14,7 +27,7 @@ export default function ProfileScreen() {
           <Text style={styles.avatarEmoji}>👤</Text>
         </View>
         <Text style={styles.userName}>User Name</Text>
-        <Text style={styles.userEmail}>user@example.com</Text>
+        <Text style={styles.userEmail}>{userEmail || 'Guest'}</Text>
       </View>
 
       {/* Stats Grid */}
@@ -59,7 +72,10 @@ export default function ProfileScreen() {
       </View>
 
       {/* Logout Button */}
-      <TouchableOpacity style={styles.logoutButton}>
+      <TouchableOpacity
+        style={styles.logoutButton}
+        onPress={() => router.replace('../index')}
+      >
         <Text style={styles.logoutButtonText}>Sign Out</Text>
       </TouchableOpacity>
 
