@@ -1,85 +1,137 @@
 import { router } from 'expo-router';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ImageBackground, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function OnboardingScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.logo}>AmiGOes 🐾</Text>
-      <Text style={styles.tagline}>Walk more. Level up your pet.</Text>
+    <ImageBackground
+      source={require('../assets/images/mesh-gradient.png')}
+      style={styles.container}
+      resizeMode="cover"
+    >
+      {/* Top section: logo, slogan, card title */}
+      <View style={styles.header}>
+        <Image
+          source={require('../assets/images/logo.png')}
+          style={styles.logoImage}
+          resizeMode="contain"
+        />
+        <Image
+          source={require('../assets/images/slogan.png')}
+          style={styles.sloganImage}
+          resizeMode="contain"
+        />
+        <Image
+          source={require('../assets/images/cardTitle.png')}
+          style={styles.cardTitle}
+          resizeMode="contain"
+        />
+        <Image
+          source={require('../assets/images/desc.png')}
+          style={styles.descriptionImage}
+          resizeMode="contain"
+        />
+      </View>
 
+      {/* Middle section: card text and buttons */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Welcome!</Text>
-        <Text style={styles.cardText}>
-          AmiGOes is your walking buddy. Earn coins, keep your pet happy, and
-          challenge your friends to move more.
-        </Text>
 
         <TouchableOpacity
-          style={styles.primaryButton}
-          onPress={() => router.replace('/(tabs)')}
-        >
-          <Text style={styles.primaryText}>Continue as Guest</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.secondaryButton}
+          style={styles.loginButton}
           onPress={() => router.push('/login')}
         >
-          <Text style={styles.secondaryText}>Log in / Sign up</Text>
+          <Image
+            source={require('../assets/images/login-button.png')}
+            style={styles.loginButtonImage}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={() => router.push('/(tabs)')}
+        >
+          <Image
+            source={require('../assets/images/guest-button.png')}
+            style={styles.loginButtonImage}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+
       </View>
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#020617',
     paddingHorizontal: 24,
     paddingVertical: 48,
-    justifyContent: 'center',
+    justifyContent: 'center', // aligns everything at the top
+    alignItems: 'center',
   },
-  logo: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#facc15',
-    marginBottom: 8,
+  header: {
+    alignItems: 'center',
+    marginBottom: 10, // space between header and card
   },
-  tagline: {
-    fontSize: 14,
-    color: '#e5e7eb',
-    marginBottom: 32,
+  logoImage: {
+    width: 300,
+    height: 110,
+    marginBottom: 10,
   },
-  card: {
-    backgroundColor: '#0f172a',
-    borderRadius: 18,
-    padding: 20,
-    gap: 12,
+  sloganImage: {
+    width: 350,
+    height: 40,
+    marginTop: -30, // pulls slogan closer to big logo
+    marginBottom: 15, // spacing below slogan
+  },
+  descriptionImage: {
+    width: 400,
+    height: 60,
+    marginBottom: 20,
   },
   cardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#e5e7eb',
+    width: 150,
+    height: 50,
+    marginBottom: 20,
+  },
+  card: {
+    width: '100%',
+    alignItems: 'center',
   },
   cardText: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#9ca3af',
+    textAlign: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 10,
   },
   primaryButton: {
     marginTop: 12,
     backgroundColor: '#22c55e',
-    paddingVertical: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 40,
     borderRadius: 999,
     alignItems: 'center',
+  },
+  loginButton: {
+    width: 200,
+    height: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loginButtonImage: {
+    width: '100%',
+    height: '100%',
   },
   primaryText: {
     color: '#022c22',
     fontWeight: '700',
   },
   secondaryButton: {
-    marginTop: 8,
-    paddingVertical: 10,
+    marginTop: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 40,
     borderRadius: 999,
     alignItems: 'center',
     borderWidth: 1,
