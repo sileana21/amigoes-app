@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function PetScreen() {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView style={styles.container}>
       <Text style={styles.title}>Your AmiGO 🐶</Text>
       <Text style={styles.subtitle}>Take walks to keep your pet happy!</Text>
 
@@ -26,11 +27,16 @@ export default function PetScreen() {
           <Text style={styles.statValue}>0</Text>
         </View>
       </View>
-    </View>
+    </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#020617',
+  },
   container: {
     flex: 1,
     backgroundColor: '#020617',
