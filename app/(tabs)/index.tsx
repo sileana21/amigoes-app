@@ -85,13 +85,19 @@ export default function HomeScreen() {
           style={styles.friendsButton}
           onPress={() => setFriendsModalVisible(true)}
         >
-          <Text style={styles.friendsButtonText}>Friends</Text>
-        </TouchableOpacity>
+          <Image
+            source={require('../../assets/images/friends-button.png')}
+            style={styles.friendsButtonImage}
+          />
+</TouchableOpacity>
       </View>
 
       {/* Daily challenge */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Today&apos;s Challenges</Text>
+        <Image
+          source={require('../../assets/images/challenge-title.png')}
+          style={styles.challengeTitleImage}
+        />
         <View style={styles.challengeCard}>
           <Text style={styles.challengeTitle}>Walk 10,000 steps</Text>
           <Text style={styles.challengeText}>
@@ -114,7 +120,10 @@ export default function HomeScreen() {
 
       {/* Steps + progress */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Today&apos;s Steps</Text>
+        <Image
+          source={require('../../assets/images/steps-title.png')}
+          style={styles.stepsTitleImage}
+        />
 
         <View style={styles.stepsRow}>
           <Text style={styles.stepsNumber}>{todaySteps}</Text>
@@ -215,6 +224,7 @@ const styles = StyleSheet.create({
   topBar: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
+    marginTop: 15,
     marginBottom: 16,
   },
   coinsPill: {
@@ -222,11 +232,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#ffffffff',
     borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
     borderWidth: 0,
     borderColor: '#1f2937',
     width: 100,
+    marginTop: 2,
   },
   coinsText: {
     color: '#facc15',
@@ -269,7 +280,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 0,
   },
   sectionTitle: {
     fontSize: 16,
@@ -278,20 +289,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   challengeCard: {
-    backgroundColor: '#0f172a',
+    backgroundColor: '#afa8cbff',
     borderRadius: 16,
     padding: 14,
     marginBottom: 12,
+    borderWidth: 2,
+    borderColor: '#1f2937',
   },
   challengeTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#facc15',
+    color: '#514971ff',
     marginBottom: 5,
   },
   challengeText: {
     fontSize: 13,
-    color: '#9ca3af',
+    color: '#ffffffff',
   },
   stepsRow: {
     flexDirection: 'row',
@@ -301,11 +314,11 @@ const styles = StyleSheet.create({
   stepsNumber: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#22c55e',
+    color: '#ffffffff',
   },
   stepsGoal: {
     fontSize: 16,
-    color: '#9ca3af',
+    color: '#ffffffff',
     marginLeft: 4,
     marginBottom: 2,
   },
@@ -320,27 +333,12 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#22c55e',
+    backgroundColor: '#ffffffff',
   },
   progressLabel: {
     marginTop: 6,
-    fontSize: 12,
-    color: '#9ca3af',
-  },
-  friendsButton: {
-    marginLeft: 12,
-    backgroundColor: '#0f172a',
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: '#1f2937',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  friendsButtonText: {
-    color: '#e5e7eb',
-    fontWeight: '600',
+    fontSize: 18,
+    color: '#ffffffff',
   },
   modalBackdrop: {
     flex: 1,
@@ -424,5 +422,29 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     transform: [{ translateX: -5 }],
+  },
+  friendsButtonImage: {
+    width: 210,                
+    height: 100,
+    resizeMode: 'contain',
+    marginTop: 28,
+    marginLeft: 190,    
+  },
+  friendsButton: {
+    width: 80,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  challengeTitleImage: {
+    width: 300,
+    height: 60,
+    resizeMode: 'contain',
+    marginBottom: 2,
+  },
+  stepsTitleImage: {
+    width: 230,
+    height: 60,
+    resizeMode: 'contain',
   },
 });
