@@ -3,18 +3,20 @@ import { useState } from 'react';
 import { SafeAreaView } from 'react-native';
 
 import {
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Image,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 import {
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
 } from 'firebase/auth';
 import { auth } from './firebaseConfig';
 
@@ -103,63 +105,84 @@ export default function LoginScreen() {
   // RENDER UI
   // ---------------------------
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <View style={styles.inner}>
-          <Text style={styles.title}>Log in to AmiGOes</Text>
-          <Text style={styles.subtitle}>
-            Use your email to save your pet and progress.
-          </Text>
+    <ImageBackground
+      source={require('../assets/images/mesh-gradient.png')}
+      style={styles.container}
+      resizeMode="cover"
+    >
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <View style={styles.inner}>
+            <Image
+              source={require('../assets/images/login-title.png')}
+              style={styles.loginTitle}
+            />
 
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="you@example.com"
-            placeholderTextColor="#6b7280"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            value={email}
-            onChangeText={setEmail}
-          />
+            <Image
+              source={require('../assets/images/login-subtitle.png')}
+              style={styles.loginTitle}
+            />
 
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="••••••••"
-            placeholderTextColor="#6b7280"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-          />
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="you@example.com"
+              placeholderTextColor="#6b7280"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
+            />
 
-          {error && <Text style={styles.errorText}>{error}</Text>}
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="••••••••"
+              placeholderTextColor="#6b7280"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+            />
 
-          <TouchableOpacity
-            style={styles.primaryButton}
-            onPress={handleLogin}
-            disabled={loading}
-          >
-            <Text style={styles.primaryText}>
-              {loading ? 'Logging in...' : 'Log In'}
-            </Text>
-          </TouchableOpacity>
+            {error && <Text style={styles.errorText}>{error}</Text>}
 
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={() => router.back()}
-          >
-            <Text style={styles.secondaryText}>Back to Onboarding</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={handleLogin}
+              disabled={loading}
+            >
+              <Image
+                source={
+                  loading
+                    ? require('../assets/images/logging-in-button.png') // cute "loading" image
+                    : require('../assets/images/login-button-2.png')  // normal button image
+                }
+                style={styles.loginButtonImage}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.linkButton} onPress={handleSignup}>
-            <Text style={styles.linkText}>Create an account</Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={() => router.back()}
+            >
+              <Image
+                source={require('../assets/images/back-button.png')}
+                style={styles.loginButtonImage}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.linkButton} onPress={handleSignup}>
+              <Text style={styles.linkText}>Create an account</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
@@ -169,49 +192,56 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#020617',
+    backgroundColor: 'transparent',
   },
   inner: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingVertical: 48,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#facc15',
-    marginBottom: 4,
+    paddingHorizontal: 30,
+    paddingVertical: 60,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: 15,
     color: '#e5e7eb',
     marginBottom: 24,
   },
   label: {
-    fontSize: 13,
-    color: '#e5e7eb',
+    fontSize: 15,
+    color: '#ffffffff',
     marginBottom: 4,
     marginTop: 8,
   },
+  loginTitle: {
+    width: '100%',
+    height: 40,
+    resizeMode: 'contain',
+    marginBottom: 10,
+  },
   input: {
-    backgroundColor: '#020617',
+    backgroundColor: '#ffffffff',
     borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#374151',
+    borderWidth: 3,
+    borderColor: '#80A1BA',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    color: '#f9fafb',
+    color: '#000000ff',
   },
   primaryButton: {
     marginTop: 20,
-    backgroundColor: '#22c55e',
+    backgroundColor: '#ffffffff',
     paddingVertical: 10,
     borderRadius: 999,
     alignItems: 'center',
   },
-  primaryText: {
-    color: '#022c22',
-    fontWeight: '700',
+  loginButton: {
+    width: 200,
+    height: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+  },
+  loginButtonImage: {
+    width: 200,
+    height: 50,
   },
   secondaryButton: {
     marginTop: 10,
@@ -230,11 +260,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   linkText: {
-    color: '#93c5fd',
-    fontSize: 13,
+    color: '#ffffffff',
+    fontSize: 15,
   },
   errorText: {
-    color: '#fca5a5',
+    color: '#ee6055',
     marginTop: 8,
   },
 });

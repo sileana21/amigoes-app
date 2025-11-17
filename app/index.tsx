@@ -40,7 +40,7 @@ export default function OnboardingScreen() {
           onPress={() => router.push('/login')}
         >
           <Image
-            source={require('../assets/images/login-button.png')}
+            source={require('../assets/images/login-button-2.png')}
             style={styles.loginButtonImage}
             resizeMode="contain"
           />
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center', // aligns everything at the top
     alignItems: 'center',
   },
-  header: {
+  header: {   
     alignItems: 'center',
     marginBottom: 10, // space between header and card
   },
