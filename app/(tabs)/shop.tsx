@@ -29,6 +29,10 @@ const GACHA_ITEMS: GachaItem[] = [
   { id: 6, name: 'Crown', emoji: '�', rarity: 'legendary', probability: 1 },
 ];
 
+const SHOP_ITEMS = [
+  { id: 101, name: "67-Shirt", price: 200, image: require('../../assets/images/67-shirt.png') },
+];
+
 const RARITY_COLORS = {
   common: '#6b7280',
   rare: '#3b82f6',
@@ -41,6 +45,7 @@ export default function ShopScreen() {
   const [pulling, setPulling] = useState(false);
   const [resultItem, setResultItem] = useState<GachaItem | null>(null);
   const [showResult, setShowResult] = useState(false);
+  const [inventory, setInventory] = useState<any[]>([]);
   const spinAnim = useRef(new Animated.Value(0)).current;
 
   const getRandomItem = (): GachaItem => {
@@ -53,6 +58,17 @@ export default function ShopScreen() {
     }
     return GACHA_ITEMS[0];
   };
+
+  const buyItem = (item: any) => {
+  if (coins < item.price) {
+    alert("Not enough coins!");
+    return;
+  }
+
+  setCoins(coins - item.price);
+  setInventory([...inventory, item]);
+  alert(`You bought: ${item.name}!`);
+};
 
   const handlePull = () => {
     if (coins < 100) return;
@@ -105,8 +121,14 @@ export default function ShopScreen() {
 
             {/* Item placed inside slot */}
             <Image
-              source={require('../../assets/images/67-shirt.png')} // your item PNG
+              source={require('../../assets/images/67-shirt.png')} 
               style={styles.slotItem}
+            />
+
+            <Image
+              source={require('../../assets/images/buy-button.png')}
+              style={styles.buyButtonImage}
+              resizeMode="contain"
             />
           </View>
 
@@ -203,8 +225,8 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   shopImage: {
-    width: 450,
-    height: 400,
+    width: 430,
+    height: 390,
     alignSelf: 'center',
   },
   title: {
@@ -356,8 +378,8 @@ const styles = StyleSheet.create({
     gap: 8,                     
   },
   shopItemImage: {
-    width: 200,
-    height: 200,
+    width: 100,
+    height: 100,
     alignSelf: 'center',
     marginBottom: 20,
   },
@@ -367,12 +389,18 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     position: 'relative', 
   },
-
   slotItem: {
     position: 'absolute',
-    top: 140,   
-    left: 77, 
+    top: 135,   
+    left: 83, 
     width: 85,
     height: 70,
+  },
+  buyButtonImage: {
+    position: 'absolute',
+    top: 195,   
+    left: 85, 
+    width: 80,
+    height: 40,
   },
 });
