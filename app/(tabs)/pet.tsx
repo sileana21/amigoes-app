@@ -162,13 +162,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   petImage: {
-    width: 180,
-    height: 180,
+    width: 300,
+    height: 300,
     borderRadius: 90,
     backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 60,
   },
   petName: {
     fontSize: 20,
