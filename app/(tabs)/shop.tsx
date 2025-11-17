@@ -122,6 +122,9 @@ export default function ShopScreen() {
 
             {SHOP_ITEMS.map((item) => (
               <View key={item.id} style={styles.itemWrapper}>
+                {/* Price */}
+                <Text style={styles.itemPrice}>{item.price} coins</Text>
+
                 <Image
                   source={require('../../assets/images/67-shirt.png')}
                   style={styles.slotItem}
@@ -131,38 +134,41 @@ export default function ShopScreen() {
                   style={styles.buyButton}
                   onPress={() => buyItem(item)}
                 >
-                  <Image
-                    source={require('../../assets/images/buy-button.png')}
-                    style={styles.buyButtonImage}
-                    resizeMode="contain"
-                  />
+
+                <Image
+                  source={require('../../assets/images/buy-button.png')}
+                  style={styles.buyButtonImage}
+                  resizeMode="contain"
+                />
                 </TouchableOpacity>
               </View>
             ))}
           </View>
 
-          <Text style={styles.title}>Gacha System 🎰</Text>
-          <Text style={styles.subtitle}>Pull for rare items! (100 coins per pull)</Text>
+          <Text style={styles.title}>Gacha System</Text>
+
           {/* Gacha Pull Section */}
+          {/* Rarity Info */}
           <View style={styles.gachaContainer}>
-            <Text style={styles.gachaTitle}>Try Your Luck!</Text>
-            
-            {/* Rarity Info */}
+            <Text style={styles.gachaSubtitle}>
+              Spend 100 coins per pull to get a random item from the shop. Each item has a rarity and a chance of appearing:
+            </Text>
             <View style={styles.rarityInfo}>
               <View style={styles.rarityRow}>
-                <Text style={[styles.rarityLabel, { color: RARITY_COLORS.common }]}>🔴 Common 50%</Text>
-                <Text style={[styles.rarityLabel, { color: RARITY_COLORS.rare }]}>🔵 Rare 25%</Text>
+                <Text style={[styles.rarityLabel, { color: 'white' }]}>🔴 Common - 50%</Text>
+                <Text style={[styles.rarityLabel, { color: 'white' }]}>🔵 Rare - 25%</Text>
               </View>
               <View style={styles.rarityRow}>
-                <Text style={[styles.rarityLabel, { color: RARITY_COLORS.epic }]}>🟣 Epic 5%</Text>
-                <Text style={[styles.rarityLabel, { color: RARITY_COLORS.legendary }]}>🟡 Legendary 1%</Text>
-              </View>
+                <Text style={[styles.rarityLabel, { color: 'white' }]}>🟣 Epic - 0.05%</Text>
+                <Text style={[styles.rarityLabel, { color: 'white' }]}>🟡 Legendary - 0.01%</Text>
             </View>
+          </View>
 
-            <Text style={styles.title}>Current Amount of Coins: </Text>
-            <Text style={styles.coinAmount}>{coins}</Text>
+          {/* Current Coins */}
+          <Text style={styles.title}>Your Coins</Text>
+          <Text style={styles.coinAmount}>{coins}</Text>
 
-            {/* Pull Button */}
+          {/* Pull Button */}
             <TouchableOpacity
               style={[
                 styles.pullButton,
@@ -175,14 +181,6 @@ export default function ShopScreen() {
                 {pulling ? 'Pulling...' : 'PULL (100 coins)'}
               </Text>
             </TouchableOpacity>
-          </View>
-
-          {/* Rarity Info Card */}
-          <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>Rarity Guide</Text>
-            <Text style={styles.infoText}>
-              Common items are easy to get. Rare items are harder. Epic items are very rare. Legendary items are extremely rare!
-            </Text>
           </View>
         </ScrollView>
 
@@ -242,12 +240,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '800',
     color: '#ffffffff',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: '#000000ff',
-    marginBottom: 24,
+    marginBottom: 10,
   },
   coinDisplay: {
     backgroundColor: '#0f172a',
@@ -269,18 +262,18 @@ const styles = StyleSheet.create({
     color: '#ffffffff',
   },
   gachaContainer: {
-    backgroundColor: '#0f172a',
+    backgroundColor: '#B95E82',
     borderRadius: 18,
     padding: 20,
     marginBottom: 24,
     borderWidth: 1,
-    borderColor: '#1f2937',
+    borderColor: '#ffffffff',
   },
   gachaTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#e5e7eb',
-    marginBottom: 16,
+    marginBottom: 20,
     textAlign: 'center',
   },
   rarityInfo: {
@@ -401,7 +394,6 @@ const styles = StyleSheet.create({
   slotItem: {
     width: 85,
     height: 70,
-    marginBottom: 1,
   },
   buyButtonImage: {
     width: '100%',
@@ -416,9 +408,22 @@ const styles = StyleSheet.create({
   },
   itemWrapper: {
     position: 'absolute',
-    top: 130,   
-    left: 85,  
+    top: 110,   
+    left: 65,  
     width: 120,
     height: 160,
+    alignItems: 'center',
+  },
+  gachaSubtitle: {
+    fontSize: 13,
+    color: '#ffffffff',
+    marginBottom: 24,
+  },
+  itemPrice: {
+    color: '#ffffffff',
+    fontWeight: '700',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 10
   },
 });
