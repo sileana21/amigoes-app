@@ -4,6 +4,7 @@ import LottieView from 'lottie-react-native';
 import { useEffect, useState } from 'react';
 import { FlatList, Image, ImageBackground, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { auth, db } from '../firebaseConfig';
+import StepTracker from "../stepCounter";
 
 
 type UserProfile = {
@@ -54,7 +55,7 @@ export default function HomeScreen() {
     loadProfile();
 
     // TODO: later, replace this with real step tracking
-    setTodaySteps(1200);
+
   }, []);
 
   const petName = profile?.petName ?? 'Sunny';
@@ -66,6 +67,8 @@ export default function HomeScreen() {
 
   return (
     <>
+    <StepTracker onStep={() => setTodaySteps(todaySteps + 1)} />
+
     <ImageBackground
       source={require('../../assets/images/bg-2.png')}
       style={styles.background}
@@ -99,7 +102,7 @@ export default function HomeScreen() {
           style={styles.challengeTitleImage}
         />
         <View style={styles.challengeCard}>
-          <Text style={styles.challengeTitle}>Walk 10,000 steps</Text>
+          <Text style={styles.challengeTitle}>Walk 3,000 steps</Text>
           <Text style={styles.challengeText}>
             Complete today&apos;s walk to earn bonus coins for your amiGO.
           </Text>
@@ -128,6 +131,12 @@ export default function HomeScreen() {
         <View style={styles.stepsRow}>
           <Text style={styles.stepsNumber}>{todaySteps}</Text>
           <Text style={styles.stepsGoal}>/ {DAILY_GOAL}</Text>
+          <TouchableOpacity
+            style={styles.incrementButton}
+            onPress={() => setTodaySteps(todaySteps + 100)}
+          >
+            <Text style={styles.incrementButtonText}>+100</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.progressTrack}>
@@ -310,6 +319,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     marginBottom: 6,
+    gap: 8,
   },
   stepsNumber: {
     fontSize: 28,
@@ -446,5 +456,18 @@ const styles = StyleSheet.create({
     width: 230,
     height: 60,
     resizeMode: 'contain',
+  },
+  incrementButton: {
+    backgroundColor: '#22c55e',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginLeft: 'auto',
+    alignSelf: 'center',
+  },
+  incrementButtonText: {
+    color: '#022c22',
+    fontWeight: '700',
+    fontSize: 14,
   },
 });
