@@ -60,14 +60,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   petCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#111827',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
+  width: 180,
+  height: 180,
+  borderRadius: 90,
+  backgroundColor: '#111827',
+  justifyContent: 'center',   // 👈 add
+  alignItems: 'center',        // 👈 add
+  alignSelf: 'center',         // 👈 add this to center the whole circle
+  marginBottom: 12,
+},
   petEmoji: {
     fontSize: 48,
   },

@@ -1,8 +1,10 @@
 import { useRouter } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
+import LottieView from 'lottie-react-native';
 import { useEffect, useState } from 'react';
 import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { auth, db } from '../firebaseConfig';
+
 
 type UserProfile = {
   email?: string;
@@ -80,26 +82,27 @@ export default function HomeScreen() {
       </View>
 
       {/* Pet greeting */}
-      <View style={styles.petCard}>
-        <View style={styles.petCircle}>
-          {/* 🦝 placeholder – later you can animate this */}
-          <Text style={styles.petEmoji}>🦝</Text>
-        </View>
-        <Text style={styles.petGreeting}>
-          Hey, I&apos;m {petName}! 👋
-        </Text>
-        <Text style={styles.petSubtitle}>
-          Level {petLevel} · I&apos;m ready to walk with you today.
-        </Text>
-      </View>
+      <View style={styles.petSection}>
+  <View style={styles.petCard}>
+      <View style={styles.petCircle}>
+  <LottieView
+    source={require('../../assets/lottie/racoonwalk.json')}
+    autoPlay
+    loop
+    style={{ width: 200, height: 175 }}
+  />
+</View>
+</View>
+</View>
+
 
       {/* Daily challenge */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Today&apos;s Challenges</Text>
         <View style={styles.challengeCard}>
-          <Text style={styles.challengeTitle}>Walk 3,000 steps</Text>
+          <Text style={styles.challengeTitle}>Walk 10,000 steps</Text>
           <Text style={styles.challengeText}>
-            Complete today&apos;s walk to earn bonus coins for your AmiGO.
+            Complete today&apos;s walk to earn bonus coins for your amiGO.
           </Text>
         </View>
         <View style={styles.challengeCard}>
@@ -224,6 +227,10 @@ const styles = StyleSheet.create({
     color: '#facc15',
     fontWeight: '700',
     fontSize: 16,
+  },
+  petSection: {
+    alignItems: 'center',    // center horizontally in the screen
+    marginBottom: 24,
   },
   petCard: {
     backgroundColor: '#0f172a',
