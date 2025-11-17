@@ -1,6 +1,7 @@
+import { useRouter } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { auth, db } from '../firebaseConfig';
 
 type UserProfile = {
@@ -13,6 +14,15 @@ type UserProfile = {
 const DAILY_GOAL = 10000; // you can change this later
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const [friendsModalVisible, setFriendsModalVisible] = useState(false);
+
+  const FRIENDS = [
+    { id: '1', name: 'Alex', status: 'Online' , level: '5'},
+    { id: '2', name: 'Jordan', status: 'Offline' , level: '3'},
+    { id: '3', name: 'Casey', status: 'Online', level: '4' },
+  ];
+
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [todaySteps, setTodaySteps] = useState(0); // placeholder for now
@@ -53,6 +63,7 @@ export default function HomeScreen() {
   const progressPercent = Math.round(progress * 100);
 
   return (
+    <>
     <View style={styles.container}>
       {/* Top bar with coins */}
       <View style={styles.topBar}>
@@ -60,6 +71,12 @@ export default function HomeScreen() {
           <Text style={styles.coinEmoji}>🪙</Text>
           <Text style={styles.coinsText}>{coins}</Text>
         </View>
+        <TouchableOpacity
+          style={styles.friendsButton}
+          onPress={() => setFriendsModalVisible(true)}
+        >
+          <Text style={styles.friendsButtonText}>Friends</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Pet greeting */}
@@ -78,11 +95,23 @@ export default function HomeScreen() {
 
       {/* Daily challenge */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Today&apos;s Challenge</Text>
+        <Text style={styles.sectionTitle}>Today&apos;s Challenges</Text>
         <View style={styles.challengeCard}>
           <Text style={styles.challengeTitle}>Walk 3,000 steps</Text>
           <Text style={styles.challengeText}>
             Complete today&apos;s walk to earn bonus coins for your AmiGO.
+          </Text>
+        </View>
+        <View style={styles.challengeCard}>
+          <Text style={styles.challengeTitle}>Feed your pet</Text>
+          <Text style={styles.challengeText}>
+            Keep your AmiGO happy and healthy by feeding them treats.
+          </Text>
+        </View>
+        <View style={styles.challengeCard}>
+          <Text style={styles.challengeTitle}>Roll on the gacha</Text>
+          <Text style={styles.challengeText}>
+            Roll for an item for your AmiGO!
           </Text>
         </View>
       </View>
@@ -107,6 +136,61 @@ export default function HomeScreen() {
         </Text>
       </View>
     </View>
+    
+    {/* Friends Modal */}
+    <Modal
+      visible={friendsModalVisible}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={() => setFriendsModalVisible(false)}
+    >
+      <View style={styles.modalBackdrop}>
+        <View style={styles.modalCard}>
+          <Text style={styles.modalTitle}>Friends</Text>
+          <FlatList
+            data={FRIENDS}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => {
+                  setFriendsModalVisible(false);
+                  router.push({
+                    pathname: '/friend-profile',
+                    params: {
+                      id: item.id,
+                      name: item.name,
+                      level: item.level,
+                      status: item.status,
+                    },
+                  });
+                }}
+              >
+                <View style={styles.friendCard}>
+                  <View style={styles.friendInfo}>
+                    <View style={styles.friendAvatar}>
+                      <Text style={styles.friendAvatarText}>{item.name.charAt(0)}</Text>
+                    </View>
+                    <View style={styles.friendText}>
+                      <Text style={styles.friendName}>{item.name}</Text>
+                      <Text style={styles.friendLevel}>Level {item.level}</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.friendStatus}>{item.status}</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+          />
+
+          <TouchableOpacity
+            style={styles.modalClose}
+            onPress={() => setFriendsModalVisible(false)}
+          >
+            <Text style={styles.modalCloseText}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+    </>
   );
 }
 
@@ -184,12 +268,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#0f172a',
     borderRadius: 16,
     padding: 14,
+    marginBottom: 12,
   },
   challengeTitle: {
     fontSize: 15,
     fontWeight: '700',
     color: '#facc15',
-    marginBottom: 4,
+    marginBottom: 5,
   },
   challengeText: {
     fontSize: 13,
@@ -228,5 +313,95 @@ const styles = StyleSheet.create({
     marginTop: 6,
     fontSize: 12,
     color: '#9ca3af',
+  },
+  friendsButton: {
+    marginLeft: 12,
+    backgroundColor: '#0f172a',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: '#1f2937',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  friendsButtonText: {
+    color: '#e5e7eb',
+    fontWeight: '600',
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(31, 7, 7, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalCard: {
+    width: '90%',
+    maxHeight: '70%',
+    backgroundColor: '#0f172a',
+    borderRadius: 14,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#1f2937',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#facc15',
+    marginBottom: 12,
+  },
+  friendCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#071028',
+    borderRadius: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#111827',
+  },
+  friendInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  friendAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#0f172a',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  friendAvatarText: {
+    color: '#e5e7eb',
+    fontWeight: '700',
+  },
+  friendText: {
+    flexDirection: 'column',
+  },
+  friendName: {
+    color: '#e5e7eb',
+    fontWeight: '600',
+  },
+  friendStatus: {
+    color: '#9ca3af',
+  },
+  modalClose: {
+    marginTop: 12,
+    backgroundColor: '#22c55e',
+    paddingVertical: 10,
+    borderRadius: 999,
+    alignItems: 'center',
+  },
+  modalCloseText: {
+    color: '#022c22',
+    fontWeight: '700',
+  },
+  friendLevel: {
+    color: '#9ca3af',
+    fontSize: 12,
+    marginTop: 2,
   },
 });
