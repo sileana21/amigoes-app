@@ -63,17 +63,18 @@ export default function PetScreen() {
           />
 
           {/* Pet avatar on top of inventory background */}
-          <View style={styles.petCircle}>
-            <Image
-              source={getAvatarImage(equippedItem)}
-              style={styles.petImage}
-              resizeMode="contain"
-            />
+          <View style={styles.petContent}>
+            <View style={styles.petCircle}>
+              <Image
+                source={getAvatarImage(equippedItem)}
+                style={styles.petImage}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.petName}>Sunny</Text>
+            <Text style={styles.petLevel}>Level 1 · Mood: Chill</Text>
           </View>
-
-          <Text style={styles.petName}>Sunny</Text>
-          <Text style={styles.petLevel}>Level 1 · Mood: Chill</Text>
-        </View>
+          </View>
 
 
         <FlatList
@@ -142,7 +143,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 13,
-    color: '#e5e7eb',
+    color: '#445066ff',
     marginBottom: 24,
   },
   petCard: {
@@ -159,19 +160,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',   // 👈 add
     alignItems: 'center',        // 👈 add
     alignSelf: 'center',         // 👈 add this to center the whole circle
-    marginBottom: 12,
+    marginBottom: 1,
   },
   petImage: {
-    width: '150%',
+    width: '180%',
     height: undefined,
     aspectRatio: 250 / 220,
-    marginTop: 300,
+    marginTop: 30,      // px is stable across devices
   },
   petName: {
     fontSize: 20,
     fontWeight: '700',
     color: '#000000ff',
-    marginTop: 70,
   },
   petLevel: {
     fontSize: 13,
@@ -246,10 +246,17 @@ const styles = StyleSheet.create({
   },
   inventoryCard: {
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start', // <-- align from top
     width: '100%',
     paddingVertical: 20,
     marginBottom: 5,
-    position: 'relative',   // VERY IMPORTANT for absolute children
+    position: 'relative',   // for absolute children
+    aspectRatio: 400 / 370, // same as your inventory image
+  },
+  petContent: {
+    position: 'absolute',   // position on top of background
+    top: '35%',             // adjust this % to center vertically on the background
+    width: '100%',
+    alignItems: 'center',
   },
 });
