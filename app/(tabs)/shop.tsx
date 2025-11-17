@@ -97,11 +97,18 @@ export default function ShopScreen() {
             <Text style={styles.coinAmount}>{coins}</Text>
           </View>
 
-          <Image
-            source={require('../../assets/images/shop.png')}
-            style={styles.shopImage}
-            resizeMode="contain"
-          />
+          <View style={styles.shopContainer}>
+            <Image
+              source={require('../../assets/images/shop.png')}
+              style={styles.shopImage}
+            />
+
+            {/* Item placed inside slot */}
+            <Image
+              source={require('../../assets/images/67-shirt.png')} // your item PNG
+              style={styles.slotItem}
+            />
+          </View>
 
           <Text style={styles.title}>Gacha System 🎰</Text>
           <Text style={styles.subtitle}>Pull for rare items! (100 coins per pull)</Text>
@@ -120,6 +127,9 @@ export default function ShopScreen() {
                 <Text style={[styles.rarityLabel, { color: RARITY_COLORS.legendary }]}>🟡 Legendary 1%</Text>
               </View>
             </View>
+
+            <Text style={styles.title}>Current Amount of Coins: </Text>
+            <Text style={styles.coinAmount}>{coins}</Text>
 
             {/* Pull Button */}
             <TouchableOpacity
@@ -344,5 +354,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',      
     justifyContent: 'flex-start', 
     gap: 8,                     
+  },
+  shopItemImage: {
+    width: 200,
+    height: 200,
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  shopContainer: {
+    width: 450,
+    height: 400,
+    alignSelf: 'center',
+    position: 'relative', 
+  },
+
+  slotItem: {
+    position: 'absolute',
+    top: 140,   
+    left: 77, 
+    width: 85,
+    height: 70,
   },
 });
