@@ -162,8 +162,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   petImage: {
-    width: 180,
-    height: 180,
+    width: 250,
+    height: 220,
     position: 'absolute',
     top: 90,            // ← adjust this value to move the pet
     alignSelf: 'center'
