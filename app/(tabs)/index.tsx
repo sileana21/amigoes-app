@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
 import LottieView from 'lottie-react-native';
 import { useEffect, useState } from 'react';
-import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, ImageBackground, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { auth, db } from '../firebaseConfig';
 
 
@@ -66,11 +66,19 @@ export default function HomeScreen() {
 
   return (
     <>
+    <ImageBackground
+      source={require('../../assets/images/bg-2.png')}
+      style={styles.background}
+      resizeMode="cover"
+    >
     <View style={styles.container}>
       {/* Top bar with coins */}
       <View style={styles.topBar}>
         <View style={styles.coinsPill}>
-          <Text style={styles.coinEmoji}>🪙</Text>
+          <Image
+            source={require('../../assets/images/coin.png')}
+            style={styles.coinImage}
+          />
           <Text style={styles.coinsText}>{coins}</Text>
         </View>
         <TouchableOpacity
@@ -80,21 +88,6 @@ export default function HomeScreen() {
           <Text style={styles.friendsButtonText}>Friends</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Pet greeting */}
-      <View style={styles.petSection}>
-  <View style={styles.petCard}>
-      <View style={styles.petCircle}>
-  <LottieView
-    source={require('../../assets/lottie/racoonwalk.json')}
-    autoPlay
-    loop
-    style={{ width: 200, height: 175 }}
-  />
-</View>
-</View>
-</View>
-
 
       {/* Daily challenge */}
       <View style={styles.section}>
@@ -137,6 +130,20 @@ export default function HomeScreen() {
         <Text style={styles.progressLabel}>
           {progressPercent}% of your daily goal
         </Text>
+      </View>
+    </View>
+
+    {/* Pet greeting */}
+    <View style={styles.petSection}>
+      <View style={styles.petCard}>
+        <View style={styles.petCircle}>
+          <LottieView
+            source={require('../../assets/lottie/racoonwalk.json')}
+            autoPlay
+            loop
+            style={{ width: 300, height: 200 }}
+          />
+        </View>
       </View>
     </View>
     
@@ -193,6 +200,7 @@ export default function HomeScreen() {
         </View>
       </View>
     </Modal>
+    </ImageBackground>
     </>
   );
 }
@@ -200,7 +208,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#020617',
+    backgroundColor: 'transparent',
     paddingHorizontal: 24,
     paddingTop: 48,
   },
@@ -212,28 +220,26 @@ const styles = StyleSheet.create({
   coinsPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#0f172a',
+    backgroundColor: '#ffffffff',
     borderRadius: 999,
     paddingHorizontal: 14,
     paddingVertical: 6,
-    borderWidth: 1,
+    borderWidth: 0,
     borderColor: '#1f2937',
-  },
-  coinEmoji: {
-    fontSize: 18,
-    marginRight: 4,
+    width: 100,
   },
   coinsText: {
     color: '#facc15',
     fontWeight: '700',
-    fontSize: 16,
+    fontSize: 25,
+    paddingLeft: 20,
   },
   petSection: {
-    alignItems: 'center',    // center horizontally in the screen
+    alignItems: 'center', 
     marginBottom: 24,
   },
   petCard: {
-    backgroundColor: '#0f172a',
+    backgroundColor: 'transparent',
     borderRadius: 20,
     padding: 20,
     alignItems: 'center',
@@ -243,7 +249,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#111827',
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -268,7 +274,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#e5e7eb',
+    color: '#485161ff',
     marginBottom: 8,
   },
   challengeCard: {
@@ -410,5 +416,13 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
     fontSize: 12,
     marginTop: 2,
+  },
+  background: {
+    flex: 1,
+  },
+  coinImage: {
+    width: 30,
+    height: 30,
+    transform: [{ translateX: -5 }],
   },
 });
