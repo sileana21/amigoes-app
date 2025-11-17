@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     color: '#ffffffff',
-    fontSize: 13,
+    fontSize: 16,
     marginTop: 8,
     textAlign: 'right',
   },
@@ -242,25 +242,13 @@ const styles = StyleSheet.create({
     width: 200,
     height: 50,
   },
-  secondaryButton: {
-    marginTop: 10,
-    paddingVertical: 10,
-    borderRadius: 999,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#4b5563',
-  },
-  secondaryText: {
-    color: '#e5e7eb',
-    fontWeight: '600',
-  },
   linkButton: {
     marginTop: 12,
     alignItems: 'center',
   },
   linkText: {
     color: '#ffffffff',
-    fontSize: 15,
+    fontSize: 17,
   },
   errorText: {
     color: '#ee6055',

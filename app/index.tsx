@@ -1,5 +1,11 @@
 import { router } from 'expo-router';
-import { Image, ImageBackground, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  Image,
+  ImageBackground,
+  StyleSheet,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 export default function OnboardingScreen() {
   return (
@@ -67,12 +73,12 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     paddingVertical: 48,
-    justifyContent: 'center', // aligns everything at the top
+    justifyContent: 'center',
     alignItems: 'center',
   },
   header: {   
     alignItems: 'center',
-    marginBottom: 10, // space between header and card
+    marginBottom: 10,
   },
   logoImage: {
     width: 300,
@@ -82,8 +88,8 @@ const styles = StyleSheet.create({
   sloganImage: {
     width: 350,
     height: 40,
-    marginTop: -30, // pulls slogan closer to big logo
-    marginBottom: 15, // spacing below slogan
+    marginTop: -30,
+    marginBottom: 15,
   },
   descriptionImage: {
     width: 400,
@@ -99,21 +105,6 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
-  cardText: {
-    fontSize: 16,
-    color: '#9ca3af',
-    textAlign: 'center',
-    marginBottom: 20,
-    paddingHorizontal: 10,
-  },
-  primaryButton: {
-    marginTop: 12,
-    backgroundColor: '#22c55e',
-    paddingVertical: 12,
-    paddingHorizontal: 40,
-    borderRadius: 999,
-    alignItems: 'center',
-  },
   loginButton: {
     width: 200,
     height: 60,
@@ -123,22 +114,5 @@ const styles = StyleSheet.create({
   loginButtonImage: {
     width: '100%',
     height: '100%',
-  },
-  primaryText: {
-    color: '#022c22',
-    fontWeight: '700',
-  },
-  secondaryButton: {
-    marginTop: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 40,
-    borderRadius: 999,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#4b5563',
-  },
-  secondaryText: {
-    color: '#e5e7eb',
-    fontWeight: '600',
   },
 });
