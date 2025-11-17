@@ -53,7 +53,10 @@ export default function PetScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>Your AmiGO</Text>
+        <Image
+          source={require('../../assets/images/inventory-title.png')}
+          style={styles.titleImage}
+        />
 
         <View style={styles.inventoryCard}>
           <Image
@@ -258,5 +261,11 @@ const styles = StyleSheet.create({
     top: '35%',             // adjust this % to center vertically on the background
     width: '100%',
     alignItems: 'center',
+  },
+  titleImage: {
+    width: 230,
+    height: 60,
+    alignSelf: 'center',
+    resizeMode: 'contain',
   },
 });

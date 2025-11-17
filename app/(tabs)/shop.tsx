@@ -22,10 +22,10 @@ interface GachaItem {
 }
 
 const GACHA_ITEMS: GachaItem[] = [
-  { id: 1, name: 'Red Ball', emoji: '🔴', rarity: 'common', probability: 50 },
-  { id: 2, name: 'Blue Ball', emoji: '🔵', rarity: 'common', probability: 50 },
+  { id: 1, name: 'Red Ball', emoji: '🔴', rarity: 'common', probability: 70 },
+  { id: 2, name: 'Blue Ball', emoji: '🔵', rarity: 'common', probability: 70 },
   { id: 3, name: 'Golden Collar', emoji: '✨', rarity: 'rare', probability: 25 },
-  { id: 4, name: 'Silver Medal', emoji: '🥈', rarity: 'rare', probability: 20 },
+  { id: 4, name: 'Silver Medal', emoji: '🥈', rarity: 'rare', probability: 25 },
   { id: 5, name: 'Dragon Toy', emoji: '🐉', rarity: 'epic', probability: 5 },
   { id: 6, name: 'Crown', emoji: '�', rarity: 'legendary', probability: 1 },
 ];
@@ -192,12 +192,12 @@ export default function ShopScreen() {
             </Text>
             <View style={styles.rarityInfo}>
               <View style={styles.rarityRow}>
-                <Text style={[styles.rarityLabel, { color: 'white' }]}>🔴 Common - 50%</Text>
+                <Text style={[styles.rarityLabel, { color: 'white' }]}>🔴 Common - 70%</Text>
                 <Text style={[styles.rarityLabel, { color: 'white' }]}>🔵 Rare - 25%</Text>
               </View>
               <View style={styles.rarityRow}>
-                <Text style={[styles.rarityLabel, { color: 'white' }]}>🟣 Epic - 0.05%</Text>
-                <Text style={[styles.rarityLabel, { color: 'white' }]}>🟡 Legendary - 0.01%</Text>
+                <Text style={[styles.rarityLabel, { color: 'white' }]}>🟣 Epic - 5%</Text>
+                <Text style={[styles.rarityLabel, { color: 'white' }]}>🟡 Legendary - 1%</Text>
             </View>
           </View>
 
