@@ -1,3 +1,5 @@
+import { useFocusEffect } from 'expo-router';
+import { doc, getDoc } from 'firebase/firestore';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -11,8 +13,6 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { useFocusEffect } from 'expo-router';
-import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
 import { addItem } from '../inventoryService';
 import { updateCoins } from '../userProfileService';
