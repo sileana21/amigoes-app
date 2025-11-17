@@ -16,13 +16,6 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
       }}>
-        <Tabs.Screen
-        name="shop"
-        options={{
-          title: 'Shop',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="storefront.fill" color={color} />,
-        }}
-      />
       <Tabs.Screen
         name="index"
         options={{
@@ -37,7 +30,14 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="pawprint.fill" color={color} />,
         }}
       />
-        <Tabs.Screen
+      <Tabs.Screen
+        name="shop"
+        options={{
+          title: 'Shop',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="storefront.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
