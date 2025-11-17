@@ -1,5 +1,16 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal, Animated } from 'react-native';
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useState } from 'react';
+import {
+  Animated,
+  Image,
+  ImageBackground,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 interface GachaItem {
   id: number;
@@ -69,113 +80,132 @@ export default function ShopScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
-        <Text style={styles.title}>Gacha System 🎰</Text>
-        <Text style={styles.subtitle}>Pull for rare items! (100 coins per pull)</Text>
+    <ImageBackground
+          source={require('../../assets/images/bg.png')}
+          style={styles.background}
+          resizeMode="cover"
+        >
 
-        {/* Coin Display */}
-        <View style={styles.coinDisplay}>
-          <Text style={styles.coinLabel}>Your Coins</Text>
-          <Text style={styles.coinAmount}>{coins}</Text>
-        </View>
-
-        {/* Gacha Pull Section */}
-        <View style={styles.gachaContainer}>
-          <Text style={styles.gachaTitle}>Try Your Luck!</Text>
-          
-          {/* Rarity Info */}
-          <View style={styles.rarityInfo}>
-            <View style={styles.rarityRow}>
-              <Text style={[styles.rarityLabel, { color: RARITY_COLORS.common }]}>🔴 Common 50%</Text>
-              <Text style={[styles.rarityLabel, { color: RARITY_COLORS.rare }]}>🔵 Rare 25%</Text>
-            </View>
-            <View style={styles.rarityRow}>
-              <Text style={[styles.rarityLabel, { color: RARITY_COLORS.epic }]}>🟣 Epic 5%</Text>
-              <Text style={[styles.rarityLabel, { color: RARITY_COLORS.legendary }]}>🟡 Legendary 1%</Text>
-            </View>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView style={styles.scrollContent}>
+          <Text style={styles.title}>Your Coins</Text>
+          <View style={styles.coinRow}>
+            <Image
+              source={require('../../assets/images/coin.png')}
+              style={styles.coinImage}
+            />
+            <Text style={styles.coinAmount}>{coins}</Text>
           </View>
 
-          {/* Pull Button */}
-          <TouchableOpacity
-            style={[
-              styles.pullButton,
-              { opacity: coins < 100 || pulling ? 0.5 : 1 },
-            ]}
-            onPress={handlePull}
-            disabled={coins < 100 || pulling}
-          >
-            <Text style={styles.pullButtonText}>
-              {pulling ? 'Pulling...' : 'PULL (100 coins)'}
-            </Text>
-          </TouchableOpacity>
-        </View>
+          <Image
+            source={require('../../assets/images/shop.png')}
+            style={styles.shopImage}
+            resizeMode="contain"
+          />
 
-        {/* Rarity Info Card */}
-        <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>Rarity Guide</Text>
-          <Text style={styles.infoText}>
-            Common items are easy to get. Rare items are harder. Epic items are very rare. Legendary items are extremely rare!
-          </Text>
-        </View>
-      </ScrollView>
+          <Text style={styles.title}>Gacha System 🎰</Text>
+          <Text style={styles.subtitle}>Pull for rare items! (100 coins per pull)</Text>
+          {/* Gacha Pull Section */}
+          <View style={styles.gachaContainer}>
+            <Text style={styles.gachaTitle}>Try Your Luck!</Text>
+            
+            {/* Rarity Info */}
+            <View style={styles.rarityInfo}>
+              <View style={styles.rarityRow}>
+                <Text style={[styles.rarityLabel, { color: RARITY_COLORS.common }]}>🔴 Common 50%</Text>
+                <Text style={[styles.rarityLabel, { color: RARITY_COLORS.rare }]}>🔵 Rare 25%</Text>
+              </View>
+              <View style={styles.rarityRow}>
+                <Text style={[styles.rarityLabel, { color: RARITY_COLORS.epic }]}>🟣 Epic 5%</Text>
+                <Text style={[styles.rarityLabel, { color: RARITY_COLORS.legendary }]}>🟡 Legendary 1%</Text>
+              </View>
+            </View>
 
-      {/* Result Modal */}
-      <Modal visible={showResult} transparent animationType="fade">
-        <View style={styles.modalBackdrop}>
-          <View
-            style={[
-              styles.resultCard,
-              {
-                borderColor: resultItem ? RARITY_COLORS[resultItem.rarity] : '#fff',
-              },
-            ]}
-          >
-            <Text style={styles.resultTitle}>You Got!</Text>
-            <Text style={styles.resultEmoji}>{resultItem?.emoji}</Text>
-            <Text style={styles.resultName}>{resultItem?.name}</Text>
-            <Text
-              style={[
-                styles.resultRarity,
-                { color: resultItem ? RARITY_COLORS[resultItem.rarity] : '#fff' },
-              ]}
-            >
-              ✨ {resultItem?.rarity.toUpperCase()} ✨
-            </Text>
-
+            {/* Pull Button */}
             <TouchableOpacity
-              style={styles.okButton}
-              onPress={() => setShowResult(false)}
+              style={[
+                styles.pullButton,
+                { opacity: coins < 100 || pulling ? 0.5 : 1 },
+              ]}
+              onPress={handlePull}
+              disabled={coins < 100 || pulling}
             >
-              <Text style={styles.okButtonText}>Nice!</Text>
+              <Text style={styles.pullButtonText}>
+                {pulling ? 'Pulling...' : 'PULL (100 coins)'}
+              </Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
-    </SafeAreaView>
+
+          {/* Rarity Info Card */}
+          <View style={styles.infoCard}>
+            <Text style={styles.infoTitle}>Rarity Guide</Text>
+            <Text style={styles.infoText}>
+              Common items are easy to get. Rare items are harder. Epic items are very rare. Legendary items are extremely rare!
+            </Text>
+          </View>
+        </ScrollView>
+
+        {/* Result Modal */}
+        <Modal visible={showResult} transparent animationType="fade">
+          <View style={styles.modalBackdrop}>
+            <View
+              style={[
+                styles.resultCard,
+                {
+                  borderColor: resultItem ? RARITY_COLORS[resultItem.rarity] : '#fff',
+                },
+              ]}
+            >
+              <Text style={styles.resultTitle}>You Got!</Text>
+              <Text style={styles.resultEmoji}>{resultItem?.emoji}</Text>
+              <Text style={styles.resultName}>{resultItem?.name}</Text>
+              <Text
+                style={[
+                  styles.resultRarity,
+                  { color: resultItem ? RARITY_COLORS[resultItem.rarity] : '#fff' },
+                ]}
+              >
+                ✨ {resultItem?.rarity.toUpperCase()} ✨
+              </Text>
+
+              <TouchableOpacity
+                style={styles.okButton}
+                onPress={() => setShowResult(false)}
+              >
+                <Text style={styles.okButtonText}>Nice!</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+  },
   safeArea: {
     flex: 1,
-    backgroundColor: '#020617',
   },
-  container: {
-    flex: 1,
-    backgroundColor: '#020617',
-    paddingHorizontal: 24,
-    paddingVertical: 48,
+  scrollContent: {
+    padding: 20,
+  },
+  shopImage: {
+    width: 450,
+    height: 400,
+    alignSelf: 'center',
   },
   title: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#facc15',
+    color: '#ffffffff',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 13,
-    color: '#e5e7eb',
+    color: '#000000ff',
     marginBottom: 24,
   },
   coinDisplay: {
@@ -195,7 +225,7 @@ const styles = StyleSheet.create({
   coinAmount: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#fbbf24',
+    color: '#ffffffff',
   },
   gachaContainer: {
     backgroundColor: '#0f172a',
@@ -298,5 +328,21 @@ const styles = StyleSheet.create({
     color: '#022c22',
     fontWeight: '700',
     fontSize: 16,
+  },
+  coinImage: {
+    width: 50,
+    height: 50,
+  },
+  coinTitle: {
+    width: 150,
+    height: 20,
+    resizeMode: 'contain',    
+    marginBottom: 10,  
+  },
+  coinRow: {
+    flexDirection: 'row',        
+    alignItems: 'center',      
+    justifyContent: 'flex-start', 
+    gap: 8,                     
   },
 });
