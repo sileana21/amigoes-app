@@ -4,6 +4,7 @@ import {
     getDoc,
     serverTimestamp,
     setDoc,
+    updateDoc,
 } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 
@@ -23,4 +24,13 @@ export async function createUserProfileIfMissing(user: User) {
       createdAt: serverTimestamp(),
     });
   }
+}
+
+export async function updateCoins(userId: string, newCoins: number) {
+  if (!userId) return;
+  
+  const ref = doc(db, 'users', userId);
+  await updateDoc(ref, {
+    coins: newCoins,
+  });
 }
