@@ -113,23 +113,32 @@ export default function ShopScreen() {
             <Text style={styles.coinAmount}>{coins}</Text>
           </View>
 
+
           <View style={styles.shopContainer}>
             <Image
               source={require('../../assets/images/shop.png')}
               style={styles.shopImage}
             />
 
-            {/* Item placed inside slot */}
-            <Image
-              source={require('../../assets/images/67-shirt.png')} 
-              style={styles.slotItem}
-            />
+            {SHOP_ITEMS.map((item) => (
+              <View key={item.id} style={styles.itemWrapper}>
+                <Image
+                  source={require('../../assets/images/67-shirt.png')}
+                  style={styles.slotItem}
+                />
 
-            <Image
-              source={require('../../assets/images/buy-button.png')}
-              style={styles.buyButtonImage}
-              resizeMode="contain"
-            />
+                <TouchableOpacity
+                  style={styles.buyButton}
+                  onPress={() => buyItem(item)}
+                >
+                  <Image
+                    source={require('../../assets/images/buy-button.png')}
+                    style={styles.buyButtonImage}
+                    resizeMode="contain"
+                  />
+                </TouchableOpacity>
+              </View>
+            ))}
           </View>
 
           <Text style={styles.title}>Gacha System 🎰</Text>
@@ -390,17 +399,26 @@ const styles = StyleSheet.create({
     position: 'relative', 
   },
   slotItem: {
-    position: 'absolute',
-    top: 135,   
-    left: 83, 
     width: 85,
     height: 70,
+    marginBottom: 1,
   },
   buyButtonImage: {
-    position: 'absolute',
-    top: 195,   
-    left: 85, 
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
+  },
+  buyButton: {
     width: 80,
-    height: 40,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  itemWrapper: {
+    position: 'absolute',
+    top: 130,   
+    left: 85,  
+    width: 120,
+    height: 160,
   },
 });
