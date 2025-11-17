@@ -1,33 +1,36 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function PetScreen() {
+  const ITEMS = Array.from({ length: 12 }).map((_, i) => ({ id: String(i + 1) }));
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
-      <Text style={styles.title}>Your AmiGO</Text>
-      <Text style={styles.subtitle}>Take walks to keep your pet happy!</Text>
+      <View style={styles.container}>
+        <Text style={styles.title}>Your AmiGO</Text>
+        <Text style={styles.subtitle}>Take walks to keep your pet happy!</Text>
 
-      <View style={styles.petCard}>
-        {/* Placeholder pet – you can replace this with a real image later */}
-        <View style={styles.petCircle}>
-          <Text style={styles.petEmoji}>🐾</Text>
+        <View style={styles.petCard}>
+          {/* Placeholder pet – you can replace this with a real image later */}
+          <View style={styles.petCircle}>
+            <Text style={styles.petEmoji}>🐾</Text>
+          </View>
+
+          <Text style={styles.petName}>Sunny</Text>
+          <Text style={styles.petLevel}>Level 1 · Mood: Chill</Text>
         </View>
 
-        <Text style={styles.petName}>Sunny</Text>
-        <Text style={styles.petLevel}>Level 1 · Mood: Chill</Text>
+        <FlatList
+          data={ITEMS}
+          keyExtractor={(it) => it.id}
+          numColumns={3}
+          style={styles.grid}
+          contentContainerStyle={styles.gridContent}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.itemBox} onPress={() => { /* open item slot */ }}>
+            </TouchableOpacity>
+          )}
+        />
       </View>
-
-      <View style={styles.statsRow}>
-        <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Today&apos;s Steps</Text>
-          <Text style={styles.statValue}>0</Text>
-        </View>
-        <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Total Coins</Text>
-          <Text style={styles.statValue}>0</Text>
-        </View>
-      </View>
-    </ScrollView>
     </SafeAreaView>
   );
 }
@@ -82,18 +85,28 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
     marginTop: 4,
   },
-  statsRow: {
+  itemRow: {
     flexDirection: 'row',
     gap: 12,
     marginTop: 24,
   },
-  statBox: {
+  grid: {
     flex: 1,
-    backgroundColor: '#020617',
-    borderRadius: 14,
-    padding: 12,
+    marginTop: 20,
+  },
+  gridContent: {
+    paddingBottom: 24,
+  },
+  itemBox: {
+    flex: 1,
+    margin: 6,
+    aspectRatio: 1, // square
+    backgroundColor: '#0f172a',
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#1f2937',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   statLabel: {
     fontSize: 12,
