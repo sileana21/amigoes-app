@@ -55,19 +55,26 @@ export default function PetScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>Your AmiGO</Text>
 
-        <View style={styles.petCard}>
-          {/* Placeholder pet – you can replace this with a real image later */}
-          <View style={styles.petCircle}>
-            <Image 
-            source={getAvatarImage(equippedItem)} 
-            style={styles.petImage} 
+        <View style={styles.inventoryCard}>
+          <Image
+            source={require('../../assets/images/inventory-bg.png')}
+            style={styles.inventoryBgImage}
             resizeMode="contain"
+          />
+
+          {/* Pet avatar on top of inventory background */}
+          <View style={styles.petCircle}>
+            <Image
+              source={getAvatarImage(equippedItem)}
+              style={styles.petImage}
+              resizeMode="contain"
             />
           </View>
 
           <Text style={styles.petName}>Sunny</Text>
           <Text style={styles.petLevel}>Level 1 · Mood: Chill</Text>
         </View>
+
 
         <FlatList
           data={slots}
@@ -119,13 +126,13 @@ export default function PetScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#020617',
+    backgroundColor: '#F3E9DB',
   },
   container: {
     flex: 1,
-    backgroundColor: '#020617',
+    backgroundColor: '#F3E9DB',
     padding: 24,
-  },
+  },  
   title: {
     fontSize: 28,
     fontWeight: '800',
@@ -139,37 +146,38 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   petCard: {
-    backgroundColor: '#0f172a',
+    backgroundColor: 'rgba(162, 175, 207, 1)',
     borderRadius: 18,
     padding: 20,
     alignItems: 'center',
   },
   petCircle: {
-  width: 180,
-  height: 180,
-  borderRadius: 90,
-  backgroundColor: '#111827',
-  justifyContent: 'center',   // 👈 add
-  alignItems: 'center',        // 👈 add
-  alignSelf: 'center',         // 👈 add this to center the whole circle
-  marginBottom: 12,
-},
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: 'transparent',
+    justifyContent: 'center',   // 👈 add
+    alignItems: 'center',        // 👈 add
+    alignSelf: 'center',         // 👈 add this to center the whole circle
+    marginBottom: 12,
+  },
   petImage: {
     width: 180,
     height: 180,
     borderRadius: 90,
-    backgroundColor: '#111827',
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 20,
   },
   petName: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#e5e7eb',
+    color: '#000000ff',
   },
   petLevel: {
     fontSize: 13,
-    color: '#9ca3af',
+    color: '#000000ff',
     marginTop: 4,
   },
   itemRow: {
@@ -188,16 +196,17 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: 6,
     aspectRatio: 1, // square
-    backgroundColor: '#0f172a',
+    backgroundColor: '#e3d2baff',
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#1f2937',
+    borderWidth: 2,
+    borderColor: '#5d5141ff',
     alignItems: 'center',
     justifyContent: 'center',
   },
   itemBoxSelected: {
-    backgroundColor: '#0a0f1a',
-    borderColor: '#3f4652',
+    backgroundColor: '#eecfa3ff',
+    borderColor: '#666564ff',
+    borderWidth: 3,
   },
   statLabel: {
     fontSize: 12,
@@ -228,5 +237,19 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: '#9ca3af',
+  },
+  inventoryBgImage: {
+    width: 450,                // width of the inventory background
+    height: 350,               // height of the inventory background
+    position: 'absolute',      // place it behind the pet
+    bottom: 10,
+  },
+  inventoryCard: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 2,        // spacing from other content
+    width: 350,                // fixed width for the card
+    padding: 16,
+    marginTop: 50,
   },
 });
