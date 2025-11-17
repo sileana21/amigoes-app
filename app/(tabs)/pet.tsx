@@ -4,7 +4,7 @@ export default function PetScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
-      <Text style={styles.title}>Your AmiGO 🐶</Text>
+      <Text style={styles.title}>Your AmiGO</Text>
       <Text style={styles.subtitle}>Take walks to keep your pet happy!</Text>
 
       <View style={styles.petCard}>
@@ -14,7 +14,7 @@ export default function PetScreen() {
         </View>
 
         <Text style={styles.petName}>Sunny</Text>
-        <Text style={styles.petLevel}>Level 1 · Mood: Chill 😎</Text>
+        <Text style={styles.petLevel}>Level 1 · Mood: Chill</Text>
       </View>
 
       <View style={styles.statsRow}>

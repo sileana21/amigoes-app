@@ -1,5 +1,5 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal, Animated } from 'react-native';
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useState } from 'react';
+import { Animated, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface GachaItem {
   id: number;
