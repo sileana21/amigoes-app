@@ -1,11 +1,12 @@
-import { FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import { useEffect, useState } from 'react';
-import { getInventory, subscribe, InventoryItem } from '../inventoryService';
+import { FlatList, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { getInventory, InventoryItem, subscribe } from '../inventoryService';
 
 export default function PetScreen() {
   const TOTAL_SLOTS = 12;
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  const [equippedItem, setEquippedItem] = useState<InventoryItem | null>(null);
 
   useEffect(() => {
     let unsub: (() => void) | undefined;
@@ -26,16 +27,42 @@ export default function PetScreen() {
     item: inventory[i] ?? null,
   }));
 
+  // Map inventory item to avatar image
+  const getAvatarImage = (item: InventoryItem | null) => {
+    if (!item) {
+      return require('../../assets/images/avatar/nothing-on.png');
+    }
+
+    // Check by name first
+    const name = item.name.toLowerCase();
+    if (name.includes('67') || name.includes('67-shirt')) {
+      return require('../../assets/images/avatar/67-on.png');
+    }
+    if (name.includes('cloudy') || name.includes('cloudy-shirt')) {
+      return require('../../assets/images/avatar/cloudy-on.png');
+    }
+    if (name.includes('sunny') || name.includes('sunny-shirt')) {
+      return require('../../assets/images/avatar/sunny-on.png');
+    }
+
+    // Check by image path if available (fallback)
+    // For now, default to nothing-on if we can't match
+    return require('../../assets/images/avatar/nothing-on.png');
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Text style={styles.title}>Your AmiGO</Text>
-        <Text style={styles.subtitle}>Take walks to keep your pet happy!</Text>
 
         <View style={styles.petCard}>
           {/* Placeholder pet – you can replace this with a real image later */}
           <View style={styles.petCircle}>
-            <Text style={styles.petEmoji}>🐾</Text>
+            <Image 
+            source={getAvatarImage(equippedItem)} 
+            style={styles.petImage} 
+            resizeMode="contain"
+            />
           </View>
 
           <Text style={styles.petName}>Sunny</Text>
@@ -55,7 +82,17 @@ export default function PetScreen() {
                 selectedSlot === item.slotIndex && styles.itemBoxSelected,
               ]}
               onPress={() => {
-                setSelectedSlot(selectedSlot === item.slotIndex ? null : item.slotIndex);
+                if (selectedSlot === item.slotIndex) {
+                  // Deselect and unequip
+                  setSelectedSlot(null);
+                  setEquippedItem(null);
+                } else {
+                  // Select and equip the item
+                  setSelectedSlot(item.slotIndex);
+                  if (item.item) {
+                    setEquippedItem(item.item);
+                  }
+                }
               }}
             >
               {item.item ? (
@@ -93,7 +130,8 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '800',
     color: '#facc15',
-    marginBottom: 4,
+    marginBottom: 10,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 13,
@@ -116,8 +154,13 @@ const styles = StyleSheet.create({
   alignSelf: 'center',         // 👈 add this to center the whole circle
   marginBottom: 12,
 },
-  petEmoji: {
-    fontSize: 48,
+  petImage: {
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: '#111827',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   petName: {
     fontSize: 20,

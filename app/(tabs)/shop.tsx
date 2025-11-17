@@ -31,7 +31,7 @@ const GACHA_ITEMS: GachaItem[] = [
 ];
 
 const SHOP_ITEMS = [
-  { id: 101, name: "67-Shirt", price: 200, image: require('../../assets/images/67-shirt.png') },
+  { id: 101, name: "67-Shirt", price: 200, image: require('../../assets/images/shirts/67-shirt.png') },
 ];
 
 const RARITY_COLORS = {
@@ -155,7 +155,7 @@ export default function ShopScreen() {
                   <Text style={styles.itemPrice}>{item.price} coins</Text>
 
                   <Image
-                    source={require('../../assets/images/67-shirt.png')}
+                    source={require('../../assets/images/shirts/67-shirt.png')}
                     style={styles.slotItem}
                   />
 
