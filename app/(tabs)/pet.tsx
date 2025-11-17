@@ -164,16 +164,15 @@ const styles = StyleSheet.create({
   petImage: {
     width: 180,
     height: 180,
-    borderRadius: 90,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
+    position: 'absolute',
+    top: 90,            // ← adjust this value to move the pet
+    alignSelf: 'center'
   },
   petName: {
     fontSize: 20,
     fontWeight: '700',
     color: '#000000ff',
+    marginTop: 70,
   },
   petLevel: {
     fontSize: 13,
@@ -239,17 +238,19 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
   },
   inventoryBgImage: {
-    width: 450,                // width of the inventory background
-    height: 350,               // height of the inventory background
-    position: 'absolute',      // place it behind the pet
-    bottom: 10,
+    width: '100%',          // fill parent width
+    height: undefined,      // let aspect ratio control height
+    aspectRatio: 400 / 370, // match your original image’s proportions
+    position: 'absolute',
+    top: 10,                 // make it stay behind the pet
+    alignSelf: 'center',    // center horizontally
   },
   inventoryCard: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 2,        // spacing from other content
-    width: 350,                // fixed width for the card
-    padding: 16,
-    marginTop: 50,
+    width: '100%',
+    paddingVertical: 20,
+    marginBottom: 5,
+    position: 'relative',   // VERY IMPORTANT for absolute children
   },
 });
