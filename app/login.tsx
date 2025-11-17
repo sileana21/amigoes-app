@@ -1,23 +1,19 @@
 import { router } from 'expo-router';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from 'firebase/auth';
 import { useState } from 'react';
-import { SafeAreaView } from 'react-native';
-
 import {
   Image,
   ImageBackground,
   KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
+  Platform, SafeAreaView, StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
-
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from 'firebase/auth';
 import { auth } from './firebaseConfig';
 
 import { createUserProfileIfMissing } from './userProfileService';
@@ -147,6 +143,10 @@ export default function LoginScreen() {
               onChangeText={setPassword}
             />
 
+            <TouchableOpacity onPress={() => router.push('/reset-password')}>
+              <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+            </TouchableOpacity>
+
             {error && <Text style={styles.errorText}>{error}</Text>}
 
             <TouchableOpacity
@@ -157,8 +157,8 @@ export default function LoginScreen() {
               <Image
                 source={
                   loading
-                    ? require('../assets/images/logging-in-button.png') // cute "loading" image
-                    : require('../assets/images/login-button-2.png')  // normal button image
+                    ? require('../assets/images/logging-in-button.png')
+                    : require('../assets/images/login-button-2.png') 
                 }
                 style={styles.loginButtonImage}
                 resizeMode="contain"
@@ -199,6 +199,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingVertical: 60,
   },
+  forgotPasswordText: {
+    color: '#ffffffff',
+    fontSize: 13,
+    marginTop: 8,
+    textAlign: 'right',
+  },
   subtitle: {
     fontSize: 15,
     color: '#e5e7eb',
@@ -224,13 +230,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     color: '#000000ff',
-  },
-  primaryButton: {
-    marginTop: 20,
-    backgroundColor: '#ffffffff',
-    paddingVertical: 10,
-    borderRadius: 999,
-    alignItems: 'center',
   },
   loginButton: {
     width: 200,
