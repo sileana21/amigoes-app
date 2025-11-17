@@ -1,7 +1,30 @@
-import { FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
+import { useEffect, useState } from 'react';
+import { getInventory, subscribe, InventoryItem } from '../inventoryService';
 
 export default function PetScreen() {
-  const ITEMS = Array.from({ length: 12 }).map((_, i) => ({ id: String(i + 1) }));
+  const TOTAL_SLOTS = 12;
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+
+  useEffect(() => {
+    let unsub: (() => void) | undefined;
+    (async () => {
+      const items = await getInventory();
+      setInventory(items);
+      unsub = subscribe((items) => setInventory(items));
+    })();
+
+    return () => {
+      if (unsub) unsub();
+    };
+  }, []);
+
+  // build slots array of length TOTAL_SLOTS where each element is the inventory item or null
+  const slots = Array.from({ length: TOTAL_SLOTS }).map((_, i) => ({
+    slotIndex: i,
+    item: inventory[i] ?? null,
+  }));
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -20,13 +43,34 @@ export default function PetScreen() {
         </View>
 
         <FlatList
-          data={ITEMS}
-          keyExtractor={(it) => it.id}
+          data={slots}
+          keyExtractor={(it) => String(it.slotIndex)}
           numColumns={3}
           style={styles.grid}
           contentContainerStyle={styles.gridContent}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.itemBox} onPress={() => { /* open item slot */ }}>
+            <TouchableOpacity
+              style={[
+                styles.itemBox,
+                selectedSlot === item.slotIndex && styles.itemBoxSelected,
+              ]}
+              onPress={() => {
+                setSelectedSlot(selectedSlot === item.slotIndex ? null : item.slotIndex);
+              }}
+            >
+              {item.item ? (
+                item.item.emoji ? (
+                  <Text style={styles.itemEmoji}>{item.item.emoji}</Text>
+                ) : item.item.image ? (
+                  <Image
+                    source={item.item.image}
+                    style={styles.itemImage}
+                    resizeMode="contain"
+                  />
+                ) : (
+                  <Text style={styles.itemName}>{item.item.name}</Text>
+                )
+              ) : null}
             </TouchableOpacity>
           )}
         />
@@ -108,6 +152,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  itemBoxSelected: {
+    backgroundColor: '#0a0f1a',
+    borderColor: '#3f4652',
+  },
   statLabel: {
     fontSize: 12,
     color: '#9ca3af',
@@ -116,5 +164,26 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#e5e7eb',
+  },
+  itemEmoji: {
+    fontSize: 32,
+  },
+  itemName: {
+    color: '#e5e7eb',
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  itemImage: {
+    width: 80,
+    height: 80,
+  },
+  itemImagePlaceholder: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#111827',
+    borderRadius: 8,
+  },
+  emptyText: {
+    color: '#9ca3af',
   },
 });
