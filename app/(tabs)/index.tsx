@@ -4,6 +4,7 @@ import LottieView from 'lottie-react-native';
 import { useEffect, useState } from 'react';
 import { FlatList, Image, ImageBackground, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { auth, db } from '../firebaseConfig';
+import StepTracker from "../stepCounter";
 
 
 type UserProfile = {
@@ -66,6 +67,8 @@ export default function HomeScreen() {
 
   return (
     <>
+    <StepTracker onStep={() => setTodaySteps(todaySteps + 1)} />
+
     <ImageBackground
       source={require('../../assets/images/bg-2.png')}
       style={styles.background}
