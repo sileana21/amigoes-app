@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { addItem } from '../inventoryService';
 
 interface GachaItem {
   id: number;
@@ -45,7 +46,7 @@ export default function ShopScreen() {
   const [pulling, setPulling] = useState(false);
   const [resultItem, setResultItem] = useState<GachaItem | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const [inventory, setInventory] = useState<any[]>([]);
+  const [purchasedItems, setPurchasedItems] = useState<Set<number>>(new Set());
   const spinAnim = useRef(new Animated.Value(0)).current;
 
   const getRandomItem = (): GachaItem => {
@@ -59,14 +60,27 @@ export default function ShopScreen() {
     return GACHA_ITEMS[0];
   };
 
-  const buyItem = (item: any) => {
+  const buyItem = async (item: any) => {
   if (coins < item.price) {
     alert("Not enough coins!");
     return;
   }
 
   setCoins(coins - item.price);
-  setInventory([...inventory, item]);
+  setPurchasedItems(new Set([...purchasedItems, item.id]));
+
+  // add to shared inventory (image or name will be stored)
+  try {
+    await addItem({
+      id: `${Date.now()}-${item.id}`,
+      name: item.name,
+      image: item.image,
+      sourceId: item.id,
+    });
+  } catch (e) {
+    console.warn('Failed to add item to inventory', e);
+  }
+
   alert(`You bought: ${item.name}!`);
 };
 
@@ -86,12 +100,25 @@ export default function ShopScreen() {
     ).start();
 
     // Simulate pull duration
-    setTimeout(() => {
+    setTimeout(async () => {
       const item = getRandomItem();
       setResultItem(item);
       setShowResult(true);
       setPulling(false);
       spinAnim.setValue(0);
+
+      // add gacha result to inventory
+      try {
+        await addItem({
+          id: `${Date.now()}-gacha-${item.id}`,
+          name: item.name,
+          emoji: item.emoji,
+          rarity: item.rarity,
+          sourceId: item.id,
+        });
+      } catch (e) {
+        console.warn('Failed to add gacha item to inventory', e);
+      }
     }, 2000);
   };
 
@@ -120,29 +147,39 @@ export default function ShopScreen() {
               style={styles.shopImage}
             />
 
-            {SHOP_ITEMS.map((item) => (
-              <View key={item.id} style={styles.itemWrapper}>
-                {/* Price */}
-                <Text style={styles.itemPrice}>{item.price} coins</Text>
+            {SHOP_ITEMS.map((item) => {
+              const isPurchased = purchasedItems.has(item.id);
+              return (
+                <View key={item.id} style={styles.itemWrapper}>
+                  {/* Price */}
+                  <Text style={styles.itemPrice}>{item.price} coins</Text>
 
-                <Image
-                  source={require('../../assets/images/67-shirt.png')}
-                  style={styles.slotItem}
-                />
+                  <Image
+                    source={require('../../assets/images/67-shirt.png')}
+                    style={styles.slotItem}
+                  />
 
-                <TouchableOpacity
-                  style={styles.buyButton}
-                  onPress={() => buyItem(item)}
-                >
-
-                <Image
-                  source={require('../../assets/images/buy-button.png')}
-                  style={styles.buyButtonImage}
-                  resizeMode="contain"
-                />
-                </TouchableOpacity>
-              </View>
-            ))}
+                  <TouchableOpacity
+                    style={[
+                      styles.buyButton,
+                      isPurchased && styles.buyButtonDisabled,
+                    ]}
+                    onPress={() => !isPurchased && buyItem(item)}
+                    disabled={isPurchased}
+                  >
+                    {!isPurchased ? (
+                      <Image
+                        source={require('../../assets/images/buy-button.png')}
+                        style={styles.buyButtonImage}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <Text style={styles.purchasedText}>Purchased</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              );
+            })}
           </View>
 
           <Text style={styles.title}>Gacha System</Text>
@@ -373,6 +410,18 @@ const styles = StyleSheet.create({
     height: 20,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  buyButtonDisabled: {
+    opacity: 0.6,
+  },
+  buyButtonImageDisabled: {
+    opacity: 0.5,
+  },
+  purchasedText: {
+    position: 'absolute',
+    color: '#22c55e',
+    fontWeight: '700',
+    fontSize: 12,
   },
   itemWrapper: {
     position: 'absolute',
