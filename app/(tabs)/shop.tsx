@@ -242,31 +242,17 @@ const styles = StyleSheet.create({
     color: '#ffffffff',
     marginBottom: 10,
   },
-  coinDisplay: {
-    backgroundColor: '#0f172a',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 24,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#1f2937',
-  },
-  coinLabel: {
-    fontSize: 12,
-    color: '#9ca3af',
-    marginBottom: 4,
-  },
   coinAmount: {
     fontSize: 32,
     fontWeight: '800',
     color: '#ffffffff',
   },
   gachaContainer: {
-    backgroundColor: '#B95E82',
+    backgroundColor: '#dd90afff',
     borderRadius: 18,
     padding: 20,
     marginBottom: 24,
-    borderWidth: 1,
+    borderWidth: 3,
     borderColor: '#ffffffff',
   },
   gachaTitle: {
@@ -289,7 +275,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   pullButton: {
-    backgroundColor: '#22c55e',
+    backgroundColor: '#ffffffff',
     paddingVertical: 14,
     borderRadius: 999,
     alignItems: 'center',
@@ -299,24 +285,6 @@ const styles = StyleSheet.create({
     color: '#022c22',
     fontWeight: '700',
     fontSize: 16,
-  },
-  infoCard: {
-    backgroundColor: '#0f172a',
-    borderRadius: 14,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#1f2937',
-  },
-  infoTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#facc15',
-    marginBottom: 8,
-  },
-  infoText: {
-    fontSize: 12,
-    color: '#9ca3af',
-    lineHeight: 18,
   },
   modalBackdrop: {
     flex: 1,
