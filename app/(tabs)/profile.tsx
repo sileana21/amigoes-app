@@ -77,13 +77,13 @@ export default function ProfileScreen() {
           </View>
 
           <View style={styles.statBlock}>
-            <Text style={styles.statLabel}>Total Coins</Text>
-            <Text style={styles.statValue}>150</Text>
+            <Text style={styles.statLabel}>Total Outfits</Text>
+            <Text style={styles.statValue}>1</Text>
           </View>
 
           <View style={styles.statBlock}>
-            <Text style={styles.statLabel}>Pets Owned</Text>
-            <Text style={styles.statValue}>1</Text>
+            <Text style={styles.statLabel}>Number of Friends</Text>
+            <Text style={styles.statValue}>3</Text>
           </View>
 
           <View style={styles.statBlock}>
