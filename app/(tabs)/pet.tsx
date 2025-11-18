@@ -53,6 +53,21 @@ export default function PetScreen() {
     if (name.includes('cowboy2') || name.includes('cowboy 2')) {
       return require('../../assets/images/avatar/cowboy2-on.png');
     }
+    if (name.includes('straw hat') || name.includes('strawhat')) {
+      return require('../../assets/images/avatar/strawhat-on.png');
+    }
+    if (name.includes('sombrero')) {
+      return require('../../assets/images/avatar/sombrero-on.png');
+    }
+    if (name.includes('blackhoodie') || name.includes('black hoodie') || name.includes('hoodie')) {
+      return require('../../assets/images/avatar/hoodie-on.png');
+    }
+    if (name.includes('pink cowboy') || name.includes('pink-cowboy')) {
+      return require('../../assets/images/avatar/pink-cowboy-on.png');
+    }
+    if (name.includes('maid') || name.includes('maid outfit')) {
+      return require('../../assets/images/avatar/maid-outfit-on.png');
+    }
 
     // Check by image path if available (fallback)
     // For now, default to nothing-on if we can't match

@@ -14,24 +14,23 @@ import {
   View
 } from 'react-native';
 import { auth, db } from '../firebaseConfig';
-import { addItem } from '../inventoryService';
+import { addItem, getInventory } from '../inventoryService';
 import { updateCoins } from '../userProfileService';
 
 interface GachaItem {
   id: number;
   name: string;
-  emoji: string;
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
   probability: number;
+  image?: any;
 }
 
 const GACHA_ITEMS: GachaItem[] = [
-  { id: 1, name: 'Red Ball', emoji: '🔴', rarity: 'common', probability: 70 },
-  { id: 2, name: 'Blue Ball', emoji: '🔵', rarity: 'common', probability: 70 },
-  { id: 3, name: 'Golden Collar', emoji: '✨', rarity: 'rare', probability: 25 },
-  { id: 4, name: 'Silver Medal', emoji: '🥈', rarity: 'rare', probability: 25 },
-  { id: 5, name: 'Dragon Toy', emoji: '🐉', rarity: 'epic', probability: 5 },
-  { id: 6, name: 'Crown', emoji: '�', rarity: 'legendary', probability: 1 },
+  { id: 1, name: 'Straw Hat', rarity: 'common', probability: 70, image: require('../../assets/images/accessory/strawhat.png') },
+  { id: 2, name: 'Sombrero', rarity: 'common', probability: 70, image: require('../../assets/images/accessory/sombrero.png') },
+  { id: 3, name: 'Black Hoodie', rarity: 'rare', probability: 25, image: require('../../assets/images/accessory/hoodie-on.png') },
+  { id: 4, name: 'Pink Cowboy Hat', rarity: 'epic', probability: 5, image: require('../../assets/images/accessory/pink-cowboy.png') },
+  { id: 5, name: 'Maid Outfit', rarity: 'legendary', probability: 1, image: require('../../assets/images/accessory/maid-outfit.png') },
 ];
 
 const SHOP_ITEMS = [
@@ -179,17 +178,27 @@ export default function ShopScreen() {
       setPulling(false);
       spinAnim.setValue(0);
 
-      // add gacha result to inventory
+      // Check if item already exists in inventory before adding
       try {
-        await addItem({
-          id: `${Date.now()}-gacha-${item.id}`,
-          name: item.name,
-          emoji: item.emoji,
-          rarity: item.rarity,
-          sourceId: item.id,
-        });
+        const currentInventory = await getInventory();
+        const itemExists = currentInventory.some(
+          (inventoryItem) => 
+            inventoryItem.name === item.name || 
+            (inventoryItem.sourceId && inventoryItem.sourceId === item.id)
+        );
+
+        if (!itemExists) {
+          // add gacha result to inventory only if it doesn't exist
+          await addItem({
+            id: `${Date.now()}-gacha-${item.id}`,
+            name: item.name,
+            image: item.image,
+            rarity: item.rarity,
+            sourceId: item.id,
+          });
+        }
       } catch (e) {
-        console.warn('Failed to add gacha item to inventory', e);
+        console.warn('Failed to check/add gacha item to inventory', e);
       }
     }, 2000);
   };
@@ -319,8 +328,14 @@ export default function ShopScreen() {
                 },
               ]}
             >
-              <Text style={styles.resultTitle}>You Got!</Text>
-              <Text style={styles.resultEmoji}>{resultItem?.emoji}</Text>
+              <Text style={styles.resultTitle}>You Got...</Text>
+              {resultItem?.image && (
+                <Image
+                  source={resultItem.image}
+                  style={styles.resultImage}
+                  resizeMode="contain"
+                />
+              )}
               <Text style={styles.resultName}>{resultItem?.name}</Text>
               <Text
                 style={[
@@ -328,14 +343,14 @@ export default function ShopScreen() {
                   { color: resultItem ? RARITY_COLORS[resultItem.rarity] : '#fff' },
                 ]}
               >
-                ✨ {resultItem?.rarity.toUpperCase()} ✨
+                 {resultItem?.rarity.toUpperCase()} 
               </Text>
 
               <TouchableOpacity
                 style={styles.okButton}
                 onPress={() => setShowResult(false)}
               >
-                <Text style={styles.okButtonText}>Nice!</Text>
+                <Text style={styles.okButtonText}>Claim</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -429,8 +444,9 @@ const styles = StyleSheet.create({
     color: '#facc15',
     marginBottom: 12,
   },
-  resultEmoji: {
-    fontSize: 80,
+  resultImage: {
+    width: 120,
+    height: 120,
     marginBottom: 16,
   },
   resultName: {
