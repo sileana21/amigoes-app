@@ -35,7 +35,12 @@ const GACHA_ITEMS: GachaItem[] = [
 ];
 
 const SHOP_ITEMS = [
-  { id: 101, name: "67-Shirt", price: 200, image: require('../../assets/images/shirts/67-shirt.png') },
+  { id: 101, name: "67-Shirt", price: 200, image: require('../../assets/images/accessory/67-shirt.png') },
+  { id: 102, name: "Cowboy Hat", price: 150, image: require('../../assets/images/accessory/cowboy-hat.png') },
+  { id: 103, name: "Sunny-Shirt", price: 200, image: require('../../assets/images/accessory/sunny-shirt.png') },
+  { id: 104, name: "Overalls", price: 250, image: require('../../assets/images/accessory/overalls.png') },
+  { id: 105, name: "Cloudy-Shirt", price: 200, image: require('../../assets/images/accessory/cloudy-shirt.png') },
+  { id: 106, name: "Cowboy2", price: 180, image: require('../../assets/images/accessory/cowboy2.png') },
 ];
 
 const RARITY_COLORS = {
@@ -214,16 +219,31 @@ export default function ShopScreen() {
               style={styles.shopImage}
             />
 
-            {SHOP_ITEMS.map((item) => {
+            {SHOP_ITEMS.map((item, index) => {
               const isPurchased = purchasedItems.has(item.id);
+              // Calculate position for grid layout (3 items per row)
+              const row = Math.floor(index / 3);
+              const col = index % 3;
+              const baseTop = 110;
+              const baseLeft = 65;
+              const rowHeight = 125;
+              const colWidth = 108;
+              
+              const itemStyle = {
+                ...styles.itemWrapper,
+                top: baseTop + (row * rowHeight),
+                left: baseLeft + (col * colWidth),
+              };
+              
               return (
-                <View key={item.id} style={styles.itemWrapper}>
+                <View key={item.id} style={itemStyle}>
                   {/* Price */}
                   <Text style={styles.itemPrice}>{item.price} coins</Text>
 
                   <Image
-                    source={require('../../assets/images/shirts/67-shirt.png')}
+                    source={item.image}
                     style={styles.slotItem}
+                    resizeMode="contain"
                   />
 
                   <TouchableOpacity

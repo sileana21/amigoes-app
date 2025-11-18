@@ -44,6 +44,15 @@ export default function PetScreen() {
     if (name.includes('sunny') || name.includes('sunny-shirt')) {
       return require('../../assets/images/avatar/sunny-on.png');
     }
+    if (name.includes('cowboy hat') || name.includes('cowboy-hat')) {
+      return require('../../assets/images/avatar/cowboy-on.png');
+    }
+    if (name.includes('overalls')) {
+      return require('../../assets/images/avatar/overalls-on.png');
+    }
+    if (name.includes('cowboy2') || name.includes('cowboy 2')) {
+      return require('../../assets/images/avatar/cowboy2-on.png');
+    }
 
     // Check by image path if available (fallback)
     // For now, default to nothing-on if we can't match
