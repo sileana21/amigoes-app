@@ -323,6 +323,13 @@ export default function ShopScreen() {
               </Text>
             </TouchableOpacity>
           </View>
+            
+          <Image
+            source={require('../../assets/images/other-items.png')}
+            style={styles.otherItems}
+            resizeMode="contain"
+          />
+          
         </ScrollView>
 
         {/* Result Modal */}
@@ -398,7 +405,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#dd90afff',
     borderRadius: 18,
     padding: 20,
-    marginBottom: 24,
+    marginBottom: 2,
     borderWidth: 3,
     borderColor: '#ffffffff',
   },
@@ -523,7 +530,7 @@ const styles = StyleSheet.create({
   },
   purchasedText: {
     position: 'absolute',
-    color: '#22c55e',
+    color: '#ffffffff',
     fontWeight: '700',
     fontSize: 12,
   },
@@ -549,13 +556,19 @@ const styles = StyleSheet.create({
   },
   limitedBanner: {
     width: '100%',
-    height: 200,           // adjust height as needed
-    resizeMode: 'cover',  // make image cover the space
+    height: 200,           
+    resizeMode: 'cover',  
     marginBottom: 12,  
   },
   gachaTitle: {
     width: '100%',
-    height: 80,           // adjust height as needed
-    resizeMode: 'cover',  // make image cover the space
+    height: 80,         
+    resizeMode: 'cover',  
+  },
+  otherItems: {
+    width: '100%',
+    height: 400,           
+    resizeMode: 'cover',  
+    marginBottom: 12,  
   },
 });
