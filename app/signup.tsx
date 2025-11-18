@@ -2,16 +2,16 @@ import { router } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
 import {
-	Image,
-	ImageBackground,
-	KeyboardAvoidingView,
-	Platform,
-	SafeAreaView,
-	StyleSheet,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	View
+  Image,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { auth } from './firebaseConfig';
 import { createUserProfileIfMissing } from './userProfileService';
@@ -19,23 +19,30 @@ import { createUserProfileIfMissing } from './userProfileService';
 export default function SignupScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSignup = async () => {
-    if (!email || !password) {
-      setError('Please enter email and password.');
+    if (!email || !password || !username) {
+      setError('Please fill all fields.');
       return;
     }
 
     setLoading(true);
     setError(null);
 
-    try {
-      const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
-      await createUserProfileIfMissing(cred.user);
-      router.replace('/(tabs)'); // Go to main app
-    } catch (e: any) {
+  try {
+    const cred = await createUserWithEmailAndPassword(
+      auth, 
+      email.trim(), 
+      password);
+
+    await createUserProfileIfMissing(cred.user, username.trim());
+    
+    router.replace('/(tabs)');
+
+  } catch (e: any) {
       console.log('Signup error:', e);
       if (e.code === 'auth/email-already-in-use') {
         setError('That email is already registered.');
@@ -74,6 +81,16 @@ export default function SignupScreen() {
               keyboardType="email-address"
               value={email}
               onChangeText={setEmail}
+            />
+
+            <Text style={styles.label}>Username</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="your username"
+              placeholderTextColor="#6b7280"
+              autoCapitalize="none"
+              value={username}
+              onChangeText={setUsername}
             />
 
             <Text style={styles.label}>Password</Text>

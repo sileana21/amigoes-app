@@ -1,19 +1,42 @@
 
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Image, ImageBackground, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { auth } from '../firebaseConfig';
+import { auth, db } from '../firebaseConfig';
+
 
 export default function ProfileScreen() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
+  const [coins, setCoins] = useState<number | null>(null);
+  const [petName, setPetName] = useState<string | null>(null);
+  const [petLevel, setPetLevel] = useState<number | null>(null);
+
 
   useEffect(() => {
-    const currentUser = auth.currentUser;
-    if (currentUser && currentUser.email) {
-      setUserEmail(currentUser.email);
-    }
+    const fetchUserData = async () => {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+
+      setUserEmail(currentUser.email ?? null);
+
+      const ref = doc(db, 'users', currentUser.uid);
+      const snap = await getDoc(ref);
+
+      if (snap.exists()) {
+        const data = snap.data();
+        setUsername(data.username || null);
+        setCoins(data.coins || 0);
+        setPetName(data.petName || null);
+        setPetLevel(data.petLevel || 1);
+      }
+    };
+
+    fetchUserData();
   }, []);
+
 
   return (
     <ImageBackground
@@ -40,7 +63,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* User Info */}
-        <Text style={styles.userName}>User Name</Text>
+        <Text style={styles.userName}>{username || 'User'}</Text>
         <Text style={styles.userEmail}>{userEmail || 'Guest'}</Text>
 
         {/* Stats Grid inside the card */}

@@ -1,13 +1,13 @@
 import type { User } from 'firebase/auth';
 import {
-    doc,
-    getDoc,
-    serverTimestamp,
-    setDoc,
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
 } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 
-export async function createUserProfileIfMissing(user: User) {
+export async function createUserProfileIfMissing(user: User, username: string) {
   if (!user.uid) return;
 
   const ref = doc(db, 'users', user.uid);
@@ -17,6 +17,7 @@ export async function createUserProfileIfMissing(user: User) {
   if (!snapshot.exists()) {
     await setDoc(ref, {
       email: user.email ?? '',
+      username: username,
       coins: 0,
       petName: 'Sunny',
       petLevel: 1,
