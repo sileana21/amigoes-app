@@ -57,14 +57,17 @@ export default function ProfileScreen() {
 
       {/* Combined Profile Section */}
       <View style={styles.profileCombinedCard}>
-        {/* Avatar */}
-        <View style={styles.avatarCircle}>
-          <Text style={styles.avatarEmoji}>👤</Text>
-        </View>
+        {/* Avatar Image */}
+        <Image
+          source={require('../../assets/images/profile-pic.png')}
+          style={styles.avatarImageRow}
+        />
 
         {/* User Info */}
-        <Text style={styles.userName}>{username || 'User'}</Text>
-        <Text style={styles.userEmail}>{userEmail || 'Guest'}</Text>
+        <View style={styles.userInfoRow}>
+          <Text style={styles.userName}>{username || 'User'}</Text>
+          <Text style={styles.userEmail}>{userEmail || 'Guest'}</Text>
+        </View>
 
         {/* Stats Grid inside the card */}
         <View style={styles.statsGrid}>
@@ -141,69 +144,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 48,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#facc15',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: '#e5e7eb',
-    marginBottom: 24,
-  },
-  profileCard: {
-    backgroundColor: '#0f172a',
-    borderRadius: 18,
-    padding: 20,
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  avatarCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#111827',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  avatarEmoji: {
-    fontSize: 48,
-  },
   userName: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#e5e7eb',
+    color: '#ffffffff',
+    marginTop: 12,
     marginBottom: 4,
   },
   userEmail: {
     fontSize: 13,
-    color: '#9ca3af',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 24,
-  },
-  statCard: {
-    flex: 1,
-    minWidth: '48%',
-    backgroundColor: '#0f172a',
-    borderRadius: 14,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#1f2937',
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#e5e7eb',
-    marginBottom: 12,
+    color: '#ffffffff',
   },
   settingsList: {
-    backgroundColor: '#0f172a',
+    backgroundColor: '#62c1e5',
     borderRadius: 14,
     marginBottom: 24,
     overflow: 'hidden',
@@ -215,18 +168,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#1f2937',
+    borderBottomColor: '#4d99b4ff',
   },
   settingText: {
     fontSize: 14,
-    color: '#e5e7eb',
+    color: '#ffffffff',
   },
   settingArrow: {
     fontSize: 18,
     color: '#9ca3af',
   },
   logoutButton: {
-    backgroundColor: '#ef4444',
+    backgroundColor: '#FA9578',
     paddingVertical: 12,
     borderRadius: 999,
     alignItems: 'center',
@@ -256,11 +209,10 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   profileCombinedCard: {
-    backgroundColor: '#0f172a',
+    backgroundColor: '#62c1e5',
     borderRadius: 18,
     paddingVertical: 24,
     paddingHorizontal: 18,
-    alignItems: 'center',
     marginBottom: 24,
   },
   statsGrid: {
@@ -270,26 +222,42 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-
   statBlock: {
     width: '48%',
-    backgroundColor: '#111827',
+    backgroundColor: '#1c96c5',
     borderRadius: 14,
     padding: 14,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#1f2937',
+    borderWidth: 2,
+    borderColor: '#126382',
   },
-
   statLabel: {
-    fontSize: 12,
-    color: '#9ca3af',
+    fontSize: 15,
+    color: '#ffffffff',
     marginBottom: 6,
   },
-
   statValue: {
     fontSize: 20,
     fontWeight: '700',
     color: '#22c55e',
   },
+  profileCombinedCardRow: {
+    flexDirection: 'row',         // place avatar and text side by side
+    backgroundColor: '#0f172a',
+    borderRadius: 18,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  avatarImageRow: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginRight: 16,
+  },
+  userInfoRow: {
+    flex: 1,                      // take remaining space
+    justifyContent: 'center',
+  },
+
 });
