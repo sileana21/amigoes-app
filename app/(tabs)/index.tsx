@@ -111,18 +111,21 @@ export default function HomeScreen() {
           <Text style={styles.challengeText}>
             Complete today&apos;s walk to earn bonus coins for your amiGO.
           </Text>
+          <Text style={styles.challengeReward}>Reward: +50 coins</Text>
         </View>
         <View style={styles.challengeCard}>
           <Text style={styles.challengeTitle}>Feed your pet</Text>
           <Text style={styles.challengeText}>
             Keep your AmiGO happy and healthy by feeding them treats.
           </Text>
+          <Text style={styles.challengeReward}>Reward: +20 coins</Text>
         </View>
         <View style={styles.challengeCard}>
           <Text style={styles.challengeTitle}>Roll on the gacha</Text>
           <Text style={styles.challengeText}>
             Roll for an item for your AmiGO!
           </Text>
+          <Text style={styles.challengeReward}>Reward: +10 coins</Text>
         </View>
       </View>
 
@@ -239,7 +242,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     marginTop: 15,
-    marginBottom: 16,
+    marginBottom: 5,
   },
   coinsPill: {
     flexDirection: 'row',
@@ -306,7 +309,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#afa8cbff',
     borderRadius: 16,
     padding: 14,
-    marginBottom: 12,
+    marginBottom: 6,
     borderWidth: 2,
     borderColor: '#1f2937',
   },
@@ -352,7 +355,7 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     marginTop: 6,
-    fontSize: 18,
+    fontSize: 15,
     color: '#ffffffff',
   },
   modalBackdrop: {
@@ -475,4 +478,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 14,
   },
+  challengeReward: {
+    fontSize: 13,
+    color: '#facc15',
+    fontWeight: '700',
+    marginTop: 6,
+  },
+
 });
