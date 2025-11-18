@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#22c55e',
+    color: '#ffffffff',
   },
   profileCombinedCardRow: {
     flexDirection: 'row',         // place avatar and text side by side

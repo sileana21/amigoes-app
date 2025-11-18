@@ -278,8 +278,16 @@ export default function ShopScreen() {
             })}
           </View>
 
-          <Text style={styles.title}>Gacha System</Text>
-
+          <Image
+              source={require('../../assets/images/gacha-title.png')}
+              style={styles.gachaTitle}
+              resizeMode="contain"
+            />
+          <Image
+            source={require('../../assets/images/limited-image.png')}
+            style={styles.limitedBanner}
+            resizeMode="contain"
+          />
           {/* Gacha Pull Section */}
           {/* Rarity Info */}
           <View style={styles.gachaContainer}>
@@ -393,13 +401,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     borderWidth: 3,
     borderColor: '#ffffffff',
-  },
-  gachaTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#e5e7eb',
-    marginBottom: 20,
-    textAlign: 'center',
   },
   rarityInfo: {
     marginBottom: 16,
@@ -545,5 +546,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     marginBottom: 10
+  },
+  limitedBanner: {
+    width: '100%',
+    height: 200,           // adjust height as needed
+    resizeMode: 'cover',  // make image cover the space
+    marginBottom: 12,  
+  },
+  gachaTitle: {
+    width: '100%',
+    height: 80,           // adjust height as needed
+    resizeMode: 'cover',  // make image cover the space
   },
 });
