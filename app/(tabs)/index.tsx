@@ -1,7 +1,7 @@
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
 import LottieView from 'lottie-react-native';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Image, ImageBackground, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { auth, db } from '../firebaseConfig';
 import StepTracker from "../stepCounter";
@@ -30,33 +30,38 @@ export default function HomeScreen() {
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [todaySteps, setTodaySteps] = useState(0); // placeholder for now
 
-  useEffect(() => {
-    const loadProfile = async () => {
-      const user = auth.currentUser;
-      if (!user) {
-        setLoadingProfile(false);
-        return;
+  const loadProfile = useCallback(async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      setLoadingProfile(false);
+      return;
+    }
+
+    try {
+      const ref = doc(db, 'users', user.uid);
+      const snap = await getDoc(ref);
+
+      if (snap.exists()) {
+        setProfile(snap.data() as UserProfile);
       }
-
-      try {
-        const ref = doc(db, 'users', user.uid);
-        const snap = await getDoc(ref);
-
-        if (snap.exists()) {
-          setProfile(snap.data() as UserProfile);
-        }
-      } catch (e) {
-        console.log('Error loading profile:', e);
-      } finally {
-        setLoadingProfile(false);
-      }
-    };
-
-    loadProfile();
-
-    // TODO: later, replace this with real step tracking
-
+    } catch (e) {
+      console.log('Error loading profile:', e);
+    } finally {
+      setLoadingProfile(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadProfile();
+    // TODO: later, replace this with real step tracking
+  }, [loadProfile]);
+
+  // Reload profile when screen comes into focus (to sync coins)
+  useFocusEffect(
+    useCallback(() => {
+      loadProfile();
+    }, [loadProfile])
+  );
 
   const petName = profile?.petName ?? 'Sunny';
   const petLevel = profile?.petLevel ?? 1;
@@ -251,8 +256,8 @@ const styles = StyleSheet.create({
   coinsText: {
     color: '#facc15',
     fontWeight: '700',
-    fontSize: 25,
-    paddingLeft: 20,
+    fontSize: 15,
+    paddingLeft: 5,
   },
   petSection: {
     alignItems: 'center', 

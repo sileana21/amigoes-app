@@ -1,4 +1,6 @@
-import { useRef, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { doc, getDoc } from 'firebase/firestore';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Image,
@@ -11,7 +13,9 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { auth, db } from '../firebaseConfig';
 import { addItem } from '../inventoryService';
+import { updateCoins } from '../userProfileService';
 
 interface GachaItem {
   id: number;
@@ -31,7 +35,12 @@ const GACHA_ITEMS: GachaItem[] = [
 ];
 
 const SHOP_ITEMS = [
-  { id: 101, name: "67-Shirt", price: 200, image: require('../../assets/images/shirts/67-shirt.png') },
+  { id: 101, name: "67-Shirt", price: 200, image: require('../../assets/images/accessory/67-shirt.png') },
+  { id: 102, name: "Cowboy Hat", price: 150, image: require('../../assets/images/accessory/cowboy-hat.png') },
+  { id: 103, name: "Sunny-Shirt", price: 200, image: require('../../assets/images/accessory/sunny-shirt.png') },
+  { id: 104, name: "Overalls", price: 250, image: require('../../assets/images/accessory/overalls.png') },
+  { id: 105, name: "Cloudy-Shirt", price: 200, image: require('../../assets/images/accessory/cloudy-shirt.png') },
+  { id: 106, name: "Cowboy2", price: 180, image: require('../../assets/images/accessory/cowboy2.png') },
 ];
 
 const RARITY_COLORS = {
@@ -42,12 +51,47 @@ const RARITY_COLORS = {
 };
 
 export default function ShopScreen() {
-  const [coins, setCoins] = useState(500);
+  const [coins, setCoins] = useState(0);
+  const [loadingCoins, setLoadingCoins] = useState(true);
   const [pulling, setPulling] = useState(false);
   const [resultItem, setResultItem] = useState<GachaItem | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [purchasedItems, setPurchasedItems] = useState<Set<number>>(new Set());
   const spinAnim = useRef(new Animated.Value(0)).current;
+
+  // Load coins from Firebase
+  const loadCoins = useCallback(async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      setLoadingCoins(false);
+      return;
+    }
+
+    try {
+      const ref = doc(db, 'users', user.uid);
+      const snap = await getDoc(ref);
+
+      if (snap.exists()) {
+        const data = snap.data();
+        setCoins(data.coins ?? 0);
+      }
+    } catch (e) {
+      console.log('Error loading coins:', e);
+    } finally {
+      setLoadingCoins(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadCoins();
+  }, [loadCoins]);
+
+  // Reload coins when screen comes into focus (to sync with home screen)
+  useFocusEffect(
+    useCallback(() => {
+      loadCoins();
+    }, [loadCoins])
+  );
 
   const getRandomItem = (): GachaItem => {
     const totalProbability = GACHA_ITEMS.reduce((sum, item) => sum + item.probability, 0);
@@ -61,34 +105,62 @@ export default function ShopScreen() {
   };
 
   const buyItem = async (item: any) => {
-  if (coins < item.price) {
-    alert("Not enough coins!");
-    return;
-  }
+    const user = auth.currentUser;
+    if (!user) {
+      alert("Please log in to purchase items!");
+      return;
+    }
 
-  setCoins(coins - item.price);
-  setPurchasedItems(new Set([...purchasedItems, item.id]));
+    if (coins < item.price) {
+      alert("Not enough coins!");
+      return;
+    }
 
-  // add to shared inventory (image or name will be stored)
-  try {
-    await addItem({
-      id: `${Date.now()}-${item.id}`,
-      name: item.name,
-      image: item.image,
-      sourceId: item.id,
-    });
-  } catch (e) {
-    console.warn('Failed to add item to inventory', e);
-  }
+    const newCoins = coins - item.price;
+    setCoins(newCoins);
+    setPurchasedItems(new Set([...purchasedItems, item.id]));
 
-  alert(`You bought: ${item.name}!`);
-};
+    // Update coins in Firebase
+    try {
+      await updateCoins(user.uid, newCoins);
+    } catch (e) {
+      console.warn('Failed to update coins:', e);
+    }
 
-  const handlePull = () => {
+    // add to shared inventory (image or name will be stored)
+    try {
+      await addItem({
+        id: `${Date.now()}-${item.id}`,
+        name: item.name,
+        image: item.image,
+        sourceId: item.id,
+      });
+    } catch (e) {
+      console.warn('Failed to add item to inventory', e);
+    }
+
+    alert(`You bought: ${item.name}!`);
+  };
+
+  const handlePull = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      alert("Please log in to use the gacha!");
+      return;
+    }
+
     if (coins < 100) return;
     
     setPulling(true);
-    setCoins(coins - 100);
+    const newCoins = coins - 100;
+    setCoins(newCoins);
+
+    // Update coins in Firebase
+    try {
+      await updateCoins(user.uid, newCoins);
+    } catch (e) {
+      console.warn('Failed to update coins:', e);
+    }
 
     // Animate spinning
     Animated.loop(
@@ -147,16 +219,31 @@ export default function ShopScreen() {
               style={styles.shopImage}
             />
 
-            {SHOP_ITEMS.map((item) => {
+            {SHOP_ITEMS.map((item, index) => {
               const isPurchased = purchasedItems.has(item.id);
+              // Calculate position for grid layout (3 items per row)
+              const row = Math.floor(index / 3);
+              const col = index % 3;
+              const baseTop = 110;
+              const baseLeft = 65;
+              const rowHeight = 125;
+              const colWidth = 108;
+              
+              const itemStyle = {
+                ...styles.itemWrapper,
+                top: baseTop + (row * rowHeight),
+                left: baseLeft + (col * colWidth),
+              };
+              
               return (
-                <View key={item.id} style={styles.itemWrapper}>
+                <View key={item.id} style={itemStyle}>
                   {/* Price */}
                   <Text style={styles.itemPrice}>{item.price} coins</Text>
 
                   <Image
-                    source={require('../../assets/images/shirts/67-shirt.png')}
+                    source={item.image}
                     style={styles.slotItem}
+                    resizeMode="contain"
                   />
 
                   <TouchableOpacity
