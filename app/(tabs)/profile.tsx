@@ -2,7 +2,7 @@
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ImageBackground, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { auth } from '../firebaseConfig';
 
 export default function ProfileScreen() {
@@ -16,42 +16,63 @@ export default function ProfileScreen() {
   }, []);
 
   return (
+    <ImageBackground
+          source={require('../../assets/images/bg-3.png')}
+          style={styles.background}
+          resizeMode="cover"
+        >
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
-      <Text style={styles.title}>Your Profile</Text>
-      <Text style={styles.subtitle}>Manage your account and achievements</Text>
+      <Image
+        source={require('../../assets/images/profile-title.png')}
+        style={styles.profileTitleImage}
+      />
+      <Image
+        source={require('../../assets/images/profile-desc.png')}
+        style={styles.profileDescImage}
+      />
 
-      {/* Profile Card */}
-      <View style={styles.profileCard}>
+      {/* Combined Profile Section */}
+      <View style={styles.profileCombinedCard}>
+        {/* Avatar */}
         <View style={styles.avatarCircle}>
           <Text style={styles.avatarEmoji}>👤</Text>
         </View>
+
+        {/* User Info */}
         <Text style={styles.userName}>User Name</Text>
         <Text style={styles.userEmail}>{userEmail || 'Guest'}</Text>
+
+        {/* Stats Grid inside the card */}
+        <View style={styles.statsGrid}>
+          <View style={styles.statBlock}>
+            <Text style={styles.statLabel}>Total Steps</Text>
+            <Text style={styles.statValue}>2,450</Text>
+          </View>
+
+          <View style={styles.statBlock}>
+            <Text style={styles.statLabel}>Total Coins</Text>
+            <Text style={styles.statValue}>150</Text>
+          </View>
+
+          <View style={styles.statBlock}>
+            <Text style={styles.statLabel}>Pets Owned</Text>
+            <Text style={styles.statValue}>1</Text>
+          </View>
+
+          <View style={styles.statBlock}>
+            <Text style={styles.statLabel}>Achievements</Text>
+            <Text style={styles.statValue}>3</Text>
+          </View>
+        </View>
       </View>
 
-      {/* Stats Grid */}
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <Text style={styles.statLabel}>Total Steps</Text>
-          <Text style={styles.statValue}>2,450</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statLabel}>Total Coins</Text>
-          <Text style={styles.statValue}>150</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statLabel}>Pets Owned</Text>
-          <Text style={styles.statValue}>1</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statLabel}>Achievements</Text>
-          <Text style={styles.statValue}>3</Text>
-        </View>
-      </View>
 
       {/* Settings Section */}
-      <Text style={styles.sectionTitle}>Settings</Text>
+      <Image
+        source={require('../../assets/images/settings-title.png')}
+        style={styles.settingsTitleImage}
+      />
       <View style={styles.settingsList}>
         <TouchableOpacity style={styles.settingItem}>
           <Text style={styles.settingText}>Edit Profile</Text>
@@ -82,17 +103,18 @@ export default function ProfileScreen() {
       <StatusBar style="light" />
     </ScrollView>
     </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#020617',
+    backgroundColor: 'transparent',
   },
   container: {
     flex: 1,
-    backgroundColor: '#020617',
+    backgroundColor: 'transparent',
     paddingHorizontal: 24,
     paddingVertical: 48,
   },
@@ -151,16 +173,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#1f2937',
   },
-  statLabel: {
-    fontSize: 12,
-    color: '#9ca3af',
-    marginBottom: 8,
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#22c55e',
-  },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
@@ -201,5 +213,60 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '700',
     fontSize: 14,
+  },
+  background: {
+    flex: 1,
+  },
+  profileTitleImage: {
+    width: 300,
+    height: 60,
+    resizeMode: 'contain',
+  },
+  profileDescImage: {
+    width: 300,
+    height: 60,
+    resizeMode: 'contain',
+  },
+  settingsTitleImage: {
+    width: 200,
+    height: 60,
+    resizeMode: 'contain',
+  },
+  profileCombinedCard: {
+    backgroundColor: '#0f172a',
+    borderRadius: 18,
+    paddingVertical: 24,
+    paddingHorizontal: 18,
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  statsGrid: {
+    width: '100%',
+    marginTop: 20,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+
+  statBlock: {
+    width: '48%',
+    backgroundColor: '#111827',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#1f2937',
+  },
+
+  statLabel: {
+    fontSize: 12,
+    color: '#9ca3af',
+    marginBottom: 6,
+  },
+
+  statValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#22c55e',
   },
 });
