@@ -1,10 +1,10 @@
 import type { User } from 'firebase/auth';
 import {
-  doc,
-  getDoc,
-  serverTimestamp,
-  updateDoc,
-  setDoc,
+    doc,
+    getDoc,
+    serverTimestamp,
+    setDoc,
+    updateDoc,
 } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 
@@ -34,4 +34,18 @@ export async function updateCoins(userId: string, newCoins: number) {
   await updateDoc(ref, {
     coins: newCoins,
   });
+}
+
+export async function getUserProfile(uid: string) {
+  if (!uid) return null;
+  const ref = doc(db, 'users', uid);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return null;
+  return snap.data();
+}
+
+export async function updatePetName(userId: string, petName: string) {
+  if (!userId) return;
+  const ref = doc(db, 'users', userId);
+  await updateDoc(ref, { petName });
 }
