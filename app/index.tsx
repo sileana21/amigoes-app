@@ -54,10 +54,10 @@ export default function OnboardingScreen() {
 
         <TouchableOpacity
           style={styles.loginButton}
-          onPress={() => router.push('/(tabs)')}
+          onPress={() => router.push('/signup')}
         >
           <Image
-            source={require('../assets/images/guest-button.png')}
+            source={require('../assets/images/create-account-button.png')}
             style={styles.loginButtonImage}
             resizeMode="contain"
           />
