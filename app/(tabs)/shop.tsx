@@ -35,11 +35,11 @@ const GACHA_ITEMS: GachaItem[] = [
 
 const SHOP_ITEMS = [
   { id: 101, name: "67-Shirt", price: 670, image: require('../../assets/images/accessory/67-shirt.png') },
-  { id: 102, name: "Cowboy Hat", price: 100, image: require('../../assets/images/accessory/cowboy-hat.png') },
+  { id: 102, name: "Cowboy Hat", price: 100, image: require('../../assets/images/accessory/cowboy-hat-2.png') },
   { id: 103, name: "Sunny-Shirt", price: 100, image: require('../../assets/images/accessory/sunny-shirt.png') },
-  { id: 104, name: "Overalls", price: 250, image: require('../../assets/images/accessory/overalls.png') },
+  { id: 104, name: "Overalls", price: 250, image: require('../../assets/images/accessory/overall-2.png') },
   { id: 105, name: "Cloudy-Shirt", price: 100, image: require('../../assets/images/accessory/cloudy-shirt.png') },
-  { id: 106, name: "Cowboy2", price: 200, image: require('../../assets/images/accessory/cowboy2.png') },
+  { id: 106, name: "Cowboy2", price: 200, image: require('../../assets/images/accessory/cowboy2-2.png') },
 ];
 
 const RARITY_COLORS = {
