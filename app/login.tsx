@@ -176,9 +176,6 @@ export default function LoginScreen() {
               />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.linkButton} onPress={handleSignup}>
-              <Text style={styles.linkText}>Create an account</Text>
-            </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
