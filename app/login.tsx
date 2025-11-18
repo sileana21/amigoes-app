@@ -16,7 +16,6 @@ import {
 } from 'react-native';
 import { auth } from './firebaseConfig';
 
-import { createUserProfileIfMissing } from './userProfileService';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -74,9 +73,6 @@ export default function LoginScreen() {
         email.trim(),
         password
       );
-
-      // 🔥 Create new user profile
-      await createUserProfileIfMissing(cred.user);
 
       router.replace('/(tabs)');
     } catch (e: any) {
