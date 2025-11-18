@@ -43,9 +43,6 @@ export default function LoginScreen() {
         password
       );
 
-      // 🔥 Ensure profile exists
-      await createUserProfileIfMissing(cred.user);
-
       router.replace('/(tabs)');
     } catch (e: any) {
       console.log('Login error:', e);
