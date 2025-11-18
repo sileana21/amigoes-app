@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react';
-import { FlatList, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { auth } from '../firebaseConfig';
 import { getInventory, InventoryItem, subscribe } from '../inventoryService';
+import { getUserProfile, updatePetName } from '../userProfileService';
 
 export default function PetScreen() {
   const TOTAL_SLOTS = 12;
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [equippedItem, setEquippedItem] = useState<InventoryItem | null>(null);
+  const [petName, setPetName] = useState<string>('Sunny');
+  const [editing, setEditing] = useState<boolean>(false);
+  const [saving, setSaving] = useState<boolean>(false);
 
   useEffect(() => {
     let unsub: (() => void) | undefined;
@@ -19,6 +24,21 @@ export default function PetScreen() {
     return () => {
       if (unsub) unsub();
     };
+  }, []);
+
+  // Load pet name from user profile
+  useEffect(() => {
+    const load = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+      try {
+        const profile = await getUserProfile(user.uid);
+        if (profile && profile.petName) setPetName(profile.petName as string);
+      } catch (e) {
+        console.log('Failed to load profile for pet name', e);
+      }
+    };
+    load();
   }, []);
 
   // build slots array of length TOTAL_SLOTS where each element is the inventory item or null
@@ -98,8 +118,66 @@ export default function PetScreen() {
                 resizeMode="contain"
               />
             </View>
-            <Text style={styles.petName}>Sunny</Text>
-            <Text style={styles.petLevel}>Level 1 · Mood: Chill</Text>
+            {editing ? (
+              <View style={{ alignItems: 'center' }}>
+                <TextInput
+                  value={petName}
+                  onChangeText={setPetName}
+                  placeholder="Pet name"
+                  style={styles.petNameInput}
+                  maxLength={20}
+                  editable={!saving}
+                />
+                <View style={{ flexDirection: 'row', marginTop: 12 }}>
+                  <TouchableOpacity
+                    style={[styles.textButton, styles.textButtonPrimary]}
+                    onPress={async () => {
+                      const nameTrim = petName.trim();
+                      if (nameTrim.length === 0) {
+                        Alert.alert('Name required', 'Please enter a name for your pet');
+                        return;
+                      }
+                      setSaving(true);
+                      try {
+                        const user = auth.currentUser;
+                        if (!user) throw new Error('Not logged in');
+                        await updatePetName(user.uid, nameTrim);
+                        setEditing(false);
+                        Alert.alert('Saved', 'Pet name updated');
+                      } catch (err) {
+                        console.log('Failed to save pet name', err);
+                        Alert.alert('Error', 'Could not update pet name');
+                      } finally {
+                        setSaving(false);
+                      }
+                    }}
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={styles.textButtonText}>Save</Text>
+                    )}
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.textButton, styles.textButtonSecondary]}
+                    onPress={() => setEditing(false)}
+                    disabled={saving}
+                  >
+                    <Text style={styles.textButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <View style={{ alignItems: 'center' }}>
+                <Text style={styles.petName}>{petName}</Text>
+                <TouchableOpacity onPress={() => setEditing(true)} style={{ marginTop: 6 }}>
+                  <Text style={{ color: '#007AFF' }}>Edit name</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            {/* pet level removed per UI request */}
           </View>
           </View>
 
@@ -285,6 +363,40 @@ const styles = StyleSheet.create({
     top: '35%',             // adjust this % to center vertically on the background
     width: '100%',
     alignItems: 'center',
+    zIndex: 20,
+  },
+  petNameInput: {
+    width: 220,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#d1d5db',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#000',
+    backgroundColor: '#ffffff',
+  },
+  textButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+    marginHorizontal: 6,
+    minWidth: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  textButtonPrimary: {
+    backgroundColor: '#4CAF50',
+  },
+  textButtonSecondary: {
+    backgroundColor: '#888888',
+  },
+  textButtonText: {
+    color: '#ffffff',
+    fontWeight: '700',
+    fontSize: 16,
   },
   titleImage: {
     width: 230,
