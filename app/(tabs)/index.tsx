@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Image, ImageBackground, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { auth, db } from '../firebaseConfig';
 import StepTracker from "../stepCounter";
+import { updateDailySteps } from '../userProfileService';
 
 
 type UserProfile = {
@@ -12,6 +13,7 @@ type UserProfile = {
   coins: number;
   petName: string;
   petLevel: number;
+  dailySteps?: number;
 };
 
 const DAILY_GOAL = 10000; // you can change this later
@@ -42,7 +44,10 @@ export default function HomeScreen() {
       const snap = await getDoc(ref);
 
       if (snap.exists()) {
-        setProfile(snap.data() as UserProfile);
+        const data = snap.data() as UserProfile;
+        setProfile(data);
+        // Load daily steps from Firestore
+        setTodaySteps(data.dailySteps || 0);
       }
     } catch (e) {
       console.log('Error loading profile:', e);
@@ -72,7 +77,15 @@ export default function HomeScreen() {
 
   return (
     <>
-    <StepTracker onStep={() => setTodaySteps(todaySteps + 1)} />
+    <StepTracker onStep={() => {
+      const newSteps = todaySteps + 1;
+      setTodaySteps(newSteps);
+      // Save to Firestore when steps increment
+      const user = auth.currentUser;
+      if (user) {
+        updateDailySteps(user.uid, newSteps).catch(e => console.log('Error updating steps:', e));
+      }
+    }} />
 
     <ImageBackground
       source={require('../../assets/images/bg-2.png')}
