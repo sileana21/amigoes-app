@@ -13,6 +13,8 @@ export default function ProfileScreen() {
   const [coins, setCoins] = useState<number | null>(null);
   const [petName, setPetName] = useState<string | null>(null);
   const [petLevel, setPetLevel] = useState<number | null>(null);
+  const [totalSteps, setTotalSteps] = useState<number | null>(null);
+  const [friendCount, setFriendCount] = useState<number | null>(null);
 
 
   useEffect(() => {
@@ -31,6 +33,8 @@ export default function ProfileScreen() {
         setCoins(data.coins || 0);
         setPetName(data.petName || null);
         setPetLevel(data.petLevel || 1);
+        setTotalSteps(data.totalSteps ?? data.dailySteps ?? 0);
+        setFriendCount(data.friendCount ?? 0);
       }
     };
 
@@ -73,7 +77,7 @@ export default function ProfileScreen() {
         <View style={styles.statsGrid}>
           <View style={styles.statBlock}>
             <Text style={styles.statLabel}>Total Steps</Text>
-            <Text style={styles.statValue}>2,450</Text>
+            <Text style={styles.statValue}>{totalSteps?.toLocaleString() ?? '0'}</Text>
           </View>
 
           <View style={styles.statBlock}>
@@ -83,7 +87,7 @@ export default function ProfileScreen() {
 
           <View style={styles.statBlock}>
             <Text style={styles.statLabel}>Number of Friends</Text>
-            <Text style={styles.statValue}>3</Text>
+            <Text style={styles.statValue}>{friendCount ?? 0}</Text>
           </View>
 
           <View style={styles.statBlock}>

@@ -1,6 +1,6 @@
-import { addDoc, collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Image, ImageBackground, Modal, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, ImageBackground, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { auth, db } from '../firebaseConfig';
 import { getLeaderboard, getUserProfile } from '../userProfileService';
 
@@ -16,11 +16,7 @@ export default function LeaderboardScreen() {
   const [data, setData] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [friends, setFriends] = useState<LeaderboardEntry[]>([]);
   const [friendsLoading, setFriendsLoading] = useState(true);
-  const [addModalVisible, setAddModalVisible] = useState(false);
-  const [newFriendName, setNewFriendName] = useState('');
-  const [newFriendSteps, setNewFriendSteps] = useState('');
   const [friendsList, setFriendsList] = useState<LeaderboardEntry[]>([]);
 
   useEffect(() => {
@@ -55,7 +51,7 @@ export default function LeaderboardScreen() {
     try {
       const user = auth.currentUser;
       if (!user) {
-        setFriends([]);
+        setFriendsList([]);
         return;
       }
 
@@ -71,12 +67,20 @@ export default function LeaderboardScreen() {
 
       const friendsRef = collection(db, 'users', user.uid, 'friends');
       const snap = await getDocs(friendsRef);
-      const loaded = snap.docs.map((d, i) => ({
-        id: d.id,
-        name: d.data().name || 'Friend',
-        steps: d.data().steps || 0,
+
+      // For each friend doc, resolve the friend's user document to get authoritative username and dailySteps
+      const friendUids = snap.docs.map(d => d.id);
+      const friendProfiles = await Promise.all(friendUids.map(async (fid) => {
+        const p = await getUserProfile(fid);
+        return { uid: fid, profile: p } as any;
+      }));
+
+      const loaded: LeaderboardEntry[] = friendProfiles.map(fp => ({
+        id: fp.uid,
+        name: fp.profile?.username || 'Friend',
+        steps: fp.profile?.dailySteps || 0,
         rank: 0,
-      } as LeaderboardEntry));
+      }));
 
       // merge self + friends and sort
       const merged = [selfEntry, ...loaded].sort((a, b) => b.steps - a.steps).map((it, idx) => ({ ...it, rank: idx + 1 }));
@@ -88,32 +92,7 @@ export default function LeaderboardScreen() {
     }
   };
 
-  const handleAddFriend = async () => {
-    const user = auth.currentUser;
-    if (!user) {
-      Alert.alert('Not logged in', 'Please log in to add friends');
-      return;
-    }
-
-    const name = newFriendName.trim();
-    const steps = parseInt(newFriendSteps || '0', 10) || 0;
-    if (!name) {
-      Alert.alert('Name required', 'Please enter a friend name');
-      return;
-    }
-
-    try {
-      const friendsRef = collection(db, 'users', user.uid, 'friends');
-      await addDoc(friendsRef, { name, steps });
-      setNewFriendName('');
-      setNewFriendSteps('');
-      setAddModalVisible(false);
-      loadFriends();
-    } catch (e) {
-      console.log('Error adding friend', e);
-      Alert.alert('Error', 'Could not add friend');
-    }
-  };
+  
   return (
     <ImageBackground source={require('../../assets/images/bg-2.png')} style={styles.background} resizeMode="cover">
       <SafeAreaView style={styles.safeArea}>
@@ -122,9 +101,6 @@ export default function LeaderboardScreen() {
             <Image source={require('../../assets/images/steps-title.png')} style={styles.titleImage} />
             <Text style={styles.subtitle}>Top amiGOs</Text>
           </View>
-          <TouchableOpacity style={styles.addFriendButton} onPress={() => setAddModalVisible(true)}>
-            <Text style={styles.addFriendText}>Add Friend</Text>
-          </TouchableOpacity>
         </View>
 
         {/* Friends leaderboard (personal) */}
@@ -187,24 +163,7 @@ export default function LeaderboardScreen() {
           />
         )}
 
-        {/* Add Friend Modal */}
-        <Modal visible={addModalVisible} animationType="slide" transparent>
-          <View style={styles.modalBackdrop}>
-            <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>Add Friend</Text>
-              <TextInput placeholder="Friend name" value={newFriendName} onChangeText={setNewFriendName} style={styles.modalInput} />
-              <TextInput placeholder="Steps (number)" value={newFriendSteps} onChangeText={setNewFriendSteps} style={styles.modalInput} keyboardType="numeric" />
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
-                <TouchableOpacity style={[styles.textButton, styles.textButtonSecondary]} onPress={() => setAddModalVisible(false)}>
-                  <Text style={styles.textButtonText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.textButton, styles.textButtonPrimary]} onPress={handleAddFriend}>
-                  <Text style={styles.textButtonText}>Save</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
+        
       </SafeAreaView>
     </ImageBackground>
   );
@@ -264,8 +223,6 @@ const styles = StyleSheet.create({
   avatarText: { fontWeight: '700', color: '#000' },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, marginTop: 6 },
   headerLeft: { alignItems: 'flex-start' },
-  addFriendButton: { backgroundColor: '#4CAF50', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8 },
-  addFriendText: { color: '#fff', fontWeight: '700' },
   sectionTitle: { color: '#fff', fontSize: 16, fontWeight: '700', marginTop: 8, marginBottom: 6, paddingHorizontal: 16 },
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
   modalCard: { backgroundColor: '#fff', padding: 16, borderRadius: 12, width: '90%' },

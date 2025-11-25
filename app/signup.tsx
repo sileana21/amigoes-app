@@ -2,19 +2,19 @@ import { router } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
 import {
-  Image,
-  ImageBackground,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Image,
+    ImageBackground,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { auth } from './firebaseConfig';
-import { createUserProfileIfMissing } from './userProfileService';
+import { createUserProfileIfMissing, isUsernameAvailable } from './userProfileService';
 
 export default function SignupScreen() {
   const [email, setEmail] = useState('');
@@ -31,7 +31,13 @@ export default function SignupScreen() {
 
     setLoading(true);
     setError(null);
-
+    // Check username availability before creating account
+    const available = await isUsernameAvailable(username.trim());
+    if (!available) {
+      setError('That username is already taken.');
+      setLoading(false);
+      return;
+    }
   try {
     const cred = await createUserWithEmailAndPassword(
       auth, 
