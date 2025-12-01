@@ -121,7 +121,11 @@ export default function ProfileScreen() {
       {/* Logout Button */}
       <TouchableOpacity
         style={styles.logoutButton}
-        onPress={() => router.replace('../index')}
+        onPress={async () => {
+        await auth.signOut();
+        router.replace('/login'); // or '/' if home
+        }
+      }
       >
         <Text style={styles.logoutButtonText}>Sign Out</Text>
       </TouchableOpacity>
