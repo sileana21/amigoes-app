@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { auth } from './firebaseConfig';
 import { getUserProfile, updateUserProfile } from './userProfileService';
 import { updateEmail, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
+import { useNavigation } from '@react-navigation/native';
 
 export default function EditProfileScreen() {
   const [username, setUsername] = useState('');
@@ -33,6 +34,7 @@ export default function EditProfileScreen() {
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const isEmailValid = emailRegex.test(email);
+  
 
   // --- Username Save ---
   const handleUsernameSave = async () => {
@@ -115,14 +117,28 @@ export default function EditProfileScreen() {
     }
   };
 
+  const navigation = useNavigation();
+
   return (
     <ImageBackground
-      source={require('../assets/images/bg-3.png')}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+    source={require('../assets/images/bg-3.png')}
+    style={styles.background}
+    resizeMode="cover"
+  >
+    <SafeAreaView style={styles.safeArea}>
+      {/* Header / Back button */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Main content */}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.contentContainer}>
           <Text style={styles.title}>Edit Profile</Text>
 
           {/* Username Section */}
@@ -164,59 +180,143 @@ export default function EditProfileScreen() {
               <Text style={styles.saveButtonText}>Save Email</Text>
             </TouchableOpacity>
           </View>
+        </View>
+      </ScrollView>
 
-          {/* Password Modal for reauthentication */}
-          <Modal
-            visible={modalVisible}
-            animationType="slide"
-            transparent
-            onRequestClose={() => setModalVisible(false)}
-          >
-            <View style={styles.modalBackground}>
-              <View style={styles.modalCard}>
-                <Text style={styles.modalTitle}>Enter Password</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Current password"
-                  placeholderTextColor="#ccc"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  autoComplete="off"
-                />
-                <TouchableOpacity
-                  style={styles.saveButton}
-                  onPress={handleEmailUpdateWithPassword}
-                >
-                  <Text style={styles.saveButtonText}>Confirm</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.saveButton, { backgroundColor: '#ccc', marginTop: 8 }]}
-                  onPress={() => setModalVisible(false)}
-                >
-                  <Text style={styles.saveButtonText}>Cancel</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
-        </ScrollView>
-      </SafeAreaView>
-    </ImageBackground>
+      {/* Password Modal for reauthentication */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Enter Password</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Current password"
+              placeholderTextColor="#ccc"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              autoComplete="off"
+            />
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleEmailUpdateWithPassword}
+            >
+              <Text style={styles.saveButtonText}>Confirm</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.saveButton, { backgroundColor: '#ccc', marginTop: 8 }]}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.saveButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
+  </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, paddingHorizontal: 16 },
-  background: { flex: 1 },
-  title: { fontSize: 24, fontWeight: '700', color: '#fff', marginVertical: 16 },
-  card: { backgroundColor: '#62c1e5', borderRadius: 16, padding: 16, marginBottom: 24 },
-  cardTitle: { fontSize: 18, fontWeight: '700', color: '#fff', marginBottom: 12 },
-  input: { backgroundColor: '#1c96c5', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8, color: '#fff', marginBottom: 12 },
-  warningText: { color: '#ffcc00', fontSize: 12, marginBottom: 8 },
-  saveButton: { backgroundColor: '#FFD54F', paddingVertical: 12, borderRadius: 18, alignItems: 'center' },
-  saveButtonText: { color: '#126382', fontWeight: '700', fontSize: 16 },
-  disabledButton: { backgroundColor: '#ccc' },
-  modalBackground: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.6)' },
-  modalCard: { backgroundColor: '#62c1e5', padding: 24, borderRadius: 16, width: '80%' },
-  modalTitle: { fontSize: 18, fontWeight: '700', color: '#fff', marginBottom: 12 },
+  safeArea: { 
+    flex: 1, 
+    paddingHorizontal: 16 
+  },
+  background: { 
+    flex: 1 
+  },
+  title: { 
+    fontSize: 24, 
+    fontWeight: '700', 
+    color: '#fff', 
+    marginVertical: 16 
+  },
+  card: { 
+    backgroundColor: '#62c1e5', 
+    borderRadius: 16, 
+    padding: 16, 
+    marginBottom: 24 
+  },
+  cardTitle: { 
+    fontSize: 18, 
+    fontWeight: '700', 
+    color: '#fff', 
+    marginBottom: 12 
+  },
+  input: { 
+    backgroundColor: '#1c96c5', 
+    borderRadius: 12, 
+    paddingHorizontal: 12, 
+    paddingVertical: 8, 
+    color: '#fff', 
+    marginBottom: 12 },
+  warningText: { 
+    color: '#ffcc00', 
+    fontSize: 12, 
+    marginBottom: 8 
+  },
+  saveButton: { 
+    backgroundColor: '#FFD54F', 
+    paddingVertical: 12, 
+    borderRadius: 18, 
+    alignItems: 'center' 
+  },
+  saveButtonText: { 
+    color: '#126382', 
+    fontWeight: '700', 
+    fontSize: 16 
+  },
+  disabledButton: { 
+    backgroundColor: '#ccc' 
+  },
+  modalBackground: { 
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    backgroundColor: 'rgba(0,0,0,0.6)' 
+  },
+  modalCard: { 
+    backgroundColor: '#62c1e5', 
+    padding: 24, 
+    borderRadius: 16, 
+    width: '80%' 
+  },
+  modalTitle: { 
+    fontSize: 18, 
+    fontWeight: '700', 
+    color: '#fff', 
+    marginBottom: 12 
+  },
+  header: {
+    marginVertical: 16,
+    alignItems: 'center',          // center horizontally
+  },
+  backButton: {
+    position: 'absolute',          // keep it on the left
+    left: 16,                      // margin from left edge
+    bottom: 0,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: '#FFD54F',
+    borderRadius: 12,
+  },
+  backButtonText: {
+    color: '#126382',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  scrollContent: {
+    paddingVertical: 20,
+    alignItems: 'center',
+  },
+  contentContainer: {
+    width: '90%',
+    maxWidth: 400,
+  },
+
 });
