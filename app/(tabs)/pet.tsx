@@ -87,6 +87,9 @@ export default function PetScreen() {
     if (name.includes('67') || name.includes('67-shirt')) {
       return require('../../assets/images/avatar/67-on.png');
     }
+    if (name.includes('pink cowboy') || name.includes('pink-cowboy')) {
+      return require('../../assets/images/avatar/pink-cowboy-on.png');
+    }
     if (name.includes('cloudy') || name.includes('cloudy-shirt')) {
       return require('../../assets/images/avatar/cloudy-on.png');
     }
@@ -111,9 +114,6 @@ export default function PetScreen() {
     if (name.includes('blackhoodie') || name.includes('black hoodie') || name.includes('hoodie')) {
       return require('../../assets/images/avatar/hoodie-on.png');
     }
-    if (name.includes('pink cowboy') || name.includes('pink-cowboy')) {
-      return require('../../assets/images/avatar/pink-cowboy-on.png');
-    }
     if (name.includes('maid') || name.includes('maid outfit')) {
       return require('../../assets/images/avatar/maid-outfit-on.png');
     }
@@ -132,6 +132,9 @@ export default function PetScreen() {
     const name = item.name.toLowerCase();
     if (name.includes('67') || name.includes('67-shirt')) {
       return require('../../assets/images/accessory/67-shirt.png');
+    }
+    if (name.includes('pink cowboy') || name.includes('pink-cowboy')) {
+      return require('../../assets/images/accessory/pink.png');
     }
     if (name.includes('cloudy') || name.includes('cloudy-shirt')) {
       return require('../../assets/images/accessory/cloudy-shirt.png');
@@ -156,9 +159,6 @@ export default function PetScreen() {
     }
     if (name.includes('blackhoodie') || name.includes('black hoodie') || name.includes('hoodie')) {
       return require('../../assets/images/accessory/hoodie-on.png');
-    }
-    if (name.includes('pink cowboy') || name.includes('pink-cowboy')) {
-      return require('../../assets/images/accessory/pink-cowboy.png');
     }
     if (name.includes('maid') || name.includes('maid outfit')) {
       return require('../../assets/images/accessory/maid-outfit.png');
