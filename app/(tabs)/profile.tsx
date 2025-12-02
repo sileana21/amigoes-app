@@ -119,10 +119,6 @@ export default function ProfileScreen() {
           <Text style={styles.settingArrow}>›</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Privacy & Security</Text>
-          <Text style={styles.settingArrow}>›</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingItem}>
           <Text style={styles.settingText}>About</Text>
           <Text style={styles.settingArrow}>›</Text>
         </TouchableOpacity>
