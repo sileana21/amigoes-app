@@ -58,6 +58,7 @@ export default function ShopScreen() {
   const [ownedSourceIds, setOwnedSourceIds] = useState<Set<string>>(new Set());
   const [ratesModalVisible, setRatesModalVisible] = useState(false);
   const spinAnim = useRef(new Animated.Value(0)).current;
+  const [timeLeft, setTimeLeft] = useState<string>('00:00:00');
 
   // Load coins from Firebase
   const loadCoins = useCallback(async () => {
@@ -109,6 +110,28 @@ export default function ShopScreen() {
     })();
 
     return () => { if (unsub) unsub(); };
+  }, []);
+
+  useEffect(() => {
+    const updateTimer = () => {
+      const now = new Date();
+      const nextDay = new Date();
+      nextDay.setHours(24, 0, 0, 0); // next midnight
+      const diff = nextDay.getTime() - now.getTime();
+
+      const hours = Math.floor(diff / 1000 / 60 / 60);
+      const minutes = Math.floor((diff / 1000 / 60) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      setTimeLeft(
+        `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`
+      );
+    };
+
+    const interval = setInterval(updateTimer, 1000);
+    updateTimer(); // initialize immediately
+
+    return () => clearInterval(interval);
   }, []);
 
   // Reload coins when screen comes into focus (to sync with home screen)
@@ -311,6 +334,15 @@ export default function ShopScreen() {
                 </View>
               );
             })}
+          </View>
+
+          <View style={{ marginVertical: 0, alignItems: 'center' }}>
+            <Text style={{ color: '#ffffff', fontWeight: '700', fontSize: 16 }}>
+              Daily Store Refresh In:
+            </Text>
+            <Text style={{ color: '#facc15', fontWeight: '800', fontSize: 20 }}>
+              {timeLeft}
+            </Text>
           </View>
 
           <Image
