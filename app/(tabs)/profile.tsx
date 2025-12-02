@@ -14,6 +14,7 @@ export default function ProfileScreen() {
   const [petLevel, setPetLevel] = useState<number | null>(null);
   const [totalSteps, setTotalSteps] = useState<number | null>(null);
   const [friendCount, setFriendCount] = useState<number | null>(null);
+  const [dailySteps, setDailySteps] = useState<number | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [aboutModalVisible, setAboutModalVisible] = useState(false);
   
@@ -33,6 +34,7 @@ export default function ProfileScreen() {
         setCoins(data.coins || 0);
         setPetName(data.petName || null);
         setPetLevel(data.petLevel || 1);
+        setDailySteps(data.dailySteps ?? data.dailySteps ?? 0);
         setTotalSteps(data.totalSteps ?? data.dailySteps ?? 0);
         setFriendCount(data.friendCount ?? 0);
       }
@@ -77,13 +79,13 @@ export default function ProfileScreen() {
         {/* Stats Grid inside the card */}
         <View style={styles.statsGrid}>
           <View style={styles.statBlock}>
-            <Text style={styles.statLabel}>Total Steps</Text>
-            <Text style={styles.statValue}>{totalSteps?.toLocaleString() ?? '0'}</Text>
+            <Text style={styles.statLabel}>Daily Steps</Text>
+            <Text style={styles.statValue}>{dailySteps?.toLocaleString() ?? '0'}</Text>
           </View>
 
           <View style={styles.statBlock}>
-            <Text style={styles.statLabel}>Total Outfits</Text>
-            <Text style={styles.statValue}>1</Text>
+            <Text style={styles.statLabel}>Total Steps</Text>
+            <Text style={styles.statValue}>{totalSteps?.toLocaleString() ?? '0'}</Text>
           </View>
 
           <View style={styles.statBlock}>
@@ -95,7 +97,7 @@ export default function ProfileScreen() {
             style={styles.statBlock}
             onPress={() => router.push('/achievements')} 
           >
-            <Text style={styles.statLabel}>Achievements</Text>
+            <Text style={styles.statLabel}>View Achievements</Text>
             <Text style={styles.statValue}>3</Text>
           </TouchableOpacity>
         </View>
