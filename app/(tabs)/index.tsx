@@ -24,6 +24,7 @@ type Challenge = {
   type: 'steps' | 'gacha';
   completed?: boolean;
   target?: number;
+  claimable?: boolean;
 };
 
 const INITIAL_CHALLENGES: Challenge[] = [
@@ -172,11 +173,11 @@ export default function HomeScreen() {
   );
 
   useEffect(() => {
+  // Update challenges if steps reached (but not claimed yet)
   setChallenges(prev =>
     prev.map(ch => {
       if (ch.type === 'steps' && !ch.completed && todaySteps >= (ch.target || 0)) {
-        giveCoins(ch.reward);
-        return { ...ch, completed: true };
+        return { ...ch, claimable: true };
       }
       return ch;
     })
@@ -245,6 +246,23 @@ export default function HomeScreen() {
     </Text>
     <Text style={styles.challengeText}>{ch.description}</Text>
     <Text style={styles.challengeReward}>Reward: +{ch.reward} coins</Text>
+
+    {/* Show Claim Reward button if claimable */}
+    {ch.claimable && !ch.completed && (
+      <TouchableOpacity
+        style={styles.smallButton}
+        onPress={async () => {
+          await giveCoins(ch.reward);
+          setChallenges(prev =>
+            prev.map(c => 
+              c.id === ch.id ? { ...c, completed: true, claimable: false } : c
+            )
+          );
+        }}
+      >
+        <Text style={styles.smallButtonText}>Claim Reward</Text>
+      </TouchableOpacity>
+    )}
 
   </View>
 ))}
@@ -811,12 +829,13 @@ const styles = StyleSheet.create({
     borderColor: '#111827',
   },
   smallButton: {
-    backgroundColor: '#22c55e',
+    backgroundColor: '#ffffffff',
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 5,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 10,
   },
   smallButtonText: {
     color: '#022c22',
