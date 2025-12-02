@@ -56,6 +56,7 @@ export default function ShopScreen() {
   const [resultItem, setResultItem] = useState<GachaItem | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [ownedSourceIds, setOwnedSourceIds] = useState<Set<string>>(new Set());
+  const [ratesModalVisible, setRatesModalVisible] = useState(false);
   const spinAnim = useRef(new Animated.Value(0)).current;
 
   // Load coins from Firebase
@@ -328,16 +329,38 @@ export default function ShopScreen() {
             <Text style={styles.gachaSubtitle}>
               Spend 100 coins per pull to get a random item from the shop. Each item has a rarity and a chance of appearing:
             </Text>
-            <View style={styles.rarityInfo}>
-              <View style={styles.rarityRow}>
-                <Text style={[styles.rarityLabel, { color: 'white' }]}>🔴 Common - 70%</Text>
-                <Text style={[styles.rarityLabel, { color: 'white' }]}>🔵 Rare - 25%</Text>
+
+            <TouchableOpacity
+              style={styles.ratesButton}
+              onPress={() => setRatesModalVisible(true)}
+            >
+              <Text style={styles.ratesButtonText}>View Rates</Text>
+            </TouchableOpacity>
+            <Modal
+              visible={ratesModalVisible}
+              transparent
+              animationType="slide"
+              onRequestClose={() => setRatesModalVisible(false)}
+            >
+              <View style={styles.modalBackdrop}>
+                <View style={styles.ratesModalCard}>
+                  <Text style={styles.ratesTitle}>Gacha Rates</Text>
+                  
+                  {GACHA_ITEMS.map(item => (
+                    <Text key={item.id} style={styles.ratesText}>
+                      {item.name} ({item.rarity.toUpperCase()}) - {item.probability}%
+                    </Text>
+                  ))}
+
+                  <TouchableOpacity
+                    style={styles.okButton}
+                    onPress={() => setRatesModalVisible(false)}
+                  >
+                    <Text style={styles.okButtonText}>Close</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-              <View style={styles.rarityRow}>
-                <Text style={[styles.rarityLabel, { color: 'white' }]}>🟣 Epic - 5%</Text>
-                <Text style={[styles.rarityLabel, { color: 'white' }]}>🟡 Legendary - 1%</Text>
-            </View>
-          </View>
+            </Modal>
 
           {/* Current Coins */}
           <Text style={styles.title}>Your Coins</Text>
@@ -503,7 +526,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   okButton: {
-    backgroundColor: '#22c55e',
+    backgroundColor: '#d7b8cdff',
     paddingHorizontal: 32,
     paddingVertical: 12,
     borderRadius: 999,
@@ -605,4 +628,37 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',  
     marginBottom: 12,  
   },
+  ratesButton: {
+  backgroundColor: '#ffffff',
+  paddingVertical: 10,
+  paddingHorizontal: 16,
+  borderRadius: 999,
+  alignItems: 'center',
+  alignSelf: 'flex-start',
+  marginBottom: 16,
+},
+ratesButtonText: {
+  color: '#022c22',
+  fontWeight: '700',
+  fontSize: 14,
+},
+ratesModalCard: {
+  backgroundColor: '#ffffffff',
+  borderRadius: 20,
+  padding: 24,
+  alignItems: 'center',
+  width: '80%',
+},
+ratesTitle: {
+  fontSize: 18,
+  fontWeight: '700',
+  color: '#e40d7cff',
+  marginBottom: 16,
+},
+ratesText: {
+  fontSize: 14,
+  color: '#000000ff',
+  marginBottom: 8,
+},
+
 });
