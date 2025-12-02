@@ -244,27 +244,15 @@ export async function updatePetName(userId: string, petName: string) {
   await updateDoc(ref, { petName });
 }
 
-export async function updateDailySteps(userId: string, newDailySteps: number) {
+export async function updateDailySteps(userId: string, stepsToAdd: number = 1) {
   if (!userId) return;
-  const ref = doc(db, 'users', userId);
-  try {
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return;
 
-    const prevDaily = snap.data()?.dailySteps || 0;
-    const delta = newDailySteps - prevDaily;
+  const ref = doc(db, "users", userId);
 
-    if (delta > 0) {
-      await updateDoc(ref, {
-        dailySteps: newDailySteps,
-        totalSteps: increment(delta),
-      });
-    } else {
-      await updateDoc(ref, { dailySteps: newDailySteps });
-    }
-  } catch (e) {
-    console.warn('Failed to update dailySteps', e);
-  }
+  await updateDoc(ref, {
+    dailySteps: increment(stepsToAdd),
+    totalSteps: increment(stepsToAdd),
+  });
 }
 
 export async function getLeaderboard(limit_count: number = 50) {

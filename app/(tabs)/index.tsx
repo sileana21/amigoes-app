@@ -130,15 +130,18 @@ export default function HomeScreen() {
 
   return (
     <>
-    <StepTracker onStep={() => {
-      const newSteps = todaySteps + 1;
-      setTodaySteps(newSteps);
-      // Save to Firestore when steps increment
-      const user = auth.currentUser;
-      if (user) {
-        updateDailySteps(user.uid, newSteps).catch(e => console.log('Error updating steps:', e));
-      }
-    }} />
+    <StepTracker
+      onStep={() => {
+        setTodaySteps(todaySteps + 1); // update UI immediately
+        const user = auth.currentUser;
+        if (user) {
+          // Add 1 step to both dailySteps and totalSteps atomically
+          updateDailySteps(user.uid, 1).catch(e =>
+            console.log("Error updating steps:", e)
+          );
+        }
+      }}
+    />
 
     <ImageBackground
       source={require('../../assets/images/bg-2.png')}
