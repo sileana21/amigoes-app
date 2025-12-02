@@ -1,9 +1,8 @@
-
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { Image, ImageBackground, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ImageBackground, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { auth, db } from '../firebaseConfig';
 
 
@@ -15,6 +14,7 @@ export default function ProfileScreen() {
   const [petLevel, setPetLevel] = useState<number | null>(null);
   const [totalSteps, setTotalSteps] = useState<number | null>(null);
   const [friendCount, setFriendCount] = useState<number | null>(null);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   
   useEffect(() => {
     const currentUser = auth.currentUser;
@@ -114,10 +114,15 @@ export default function ProfileScreen() {
           <Text style={styles.settingText}>Edit Profile</Text>
           <Text style={styles.settingArrow}>›</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Notifications</Text>
-          <Text style={styles.settingArrow}>›</Text>
-        </TouchableOpacity>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingText}> Push Notifications</Text>
+          <Switch
+            value={notificationsEnabled}
+            onValueChange={setNotificationsEnabled}
+            trackColor={{ false: "#4d99b4", true: "#4ade80" }}
+            thumbColor="#fff"
+          />
+        </View>
         <TouchableOpacity style={styles.settingItem}>
           <Text style={styles.settingText}>About</Text>
           <Text style={styles.settingArrow}>›</Text>
@@ -142,6 +147,8 @@ export default function ProfileScreen() {
     </ImageBackground>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   safeArea: {
