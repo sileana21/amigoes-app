@@ -1,11 +1,11 @@
 import { useFocusEffect, useRouter } from 'expo-router';
-import { doc, getDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import LottieView from 'lottie-react-native';
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, Image, ImageBackground, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Image, ImageBackground, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { auth, db } from '../firebaseConfig';
 import StepTracker from "../stepCounter";
-import { updateDailySteps } from '../userProfileService';
+import { acceptFriendRequest, declineFriendRequest, getUserByUsername, getUserProfile, sendFriendRequest, setUsername, updateDailySteps } from '../userProfileService';
 
 
 type UserProfile = {
@@ -22,11 +22,14 @@ export default function HomeScreen() {
   const router = useRouter();
   const [friendsModalVisible, setFriendsModalVisible] = useState(false);
 
-  const FRIENDS = [
-    { id: '1', name: 'Alex', status: 'Online' , level: '5'},
-    { id: '2', name: 'Jordan', status: 'Offline' , level: '3'},
-    { id: '3', name: 'Casey', status: 'Online', level: '4' },
-  ];
+  // Local state for real friends + requests
+  const [friendsList, setFriendsList] = useState<any[]>([]);
+  const [incomingRequests, setIncomingRequests] = useState<any[]>([]);
+  const [outgoingRequests, setOutgoingRequests] = useState<any[]>([]);
+  const [searchUsername, setSearchUsername] = useState('');
+  const [searchResult, setSearchResult] = useState<any | null>(null);
+  const [usernameModalVisible, setUsernameModalVisible] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
@@ -38,16 +41,11 @@ export default function HomeScreen() {
       setLoadingProfile(false);
       return;
     }
-
     try {
-      const ref = doc(db, 'users', user.uid);
-      const snap = await getDoc(ref);
-
-      if (snap.exists()) {
-        const data = snap.data() as UserProfile;
-        setProfile(data);
-        // Load daily steps from Firestore
-        setTodaySteps(data.dailySteps || 0);
+      const data = await getUserProfile(user.uid);
+      if (data) {
+        setProfile(data as UserProfile);
+        setTodaySteps((data as any).dailySteps || 0);
       }
     } catch (e) {
       console.log('Error loading profile:', e);
@@ -60,6 +58,61 @@ export default function HomeScreen() {
     loadProfile();
     // TODO: later, replace this with real step tracking
   }, [loadProfile]);
+
+  // Real-time listeners for friends and friend requests
+  useEffect(() => {
+    if (!auth.currentUser) return;
+    const uid = auth.currentUser.uid;
+
+    // Friends subcollection listener
+    const friendsRef = collection(db, 'users', uid, 'friends');
+    const unsubFriends = onSnapshot(friendsRef, (snap) => {
+      const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setFriendsList(items as any[]);
+    });
+
+    // Friend requests (incoming)
+    const requestsRef = collection(db, 'friendRequests');
+    const incomingQ = query(requestsRef, where('to', '==', uid), where('status', '==', 'pending'));
+    const unsubIncoming = onSnapshot(incomingQ, (snap) => {
+      const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      (async () => {
+        const resolved = await Promise.all(items.map(async (it: any) => {
+          const p = await getUserProfile(it.from);
+          return { ...it, fromUsername: p?.username || it.from };
+        }));
+        setIncomingRequests(resolved);
+      })();
+    });
+
+    // Friend requests (outgoing)
+    const outgoingQ = query(requestsRef, where('from', '==', uid), where('status', '==', 'pending'));
+    const unsubOutgoing = onSnapshot(outgoingQ, (snap) => {
+      const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      (async () => {
+        const resolved = await Promise.all(items.map(async (it: any) => {
+          const p = await getUserProfile(it.to);
+          return { ...it, toUsername: p?.username || it.to };
+        }));
+        setOutgoingRequests(resolved);
+      })();
+    });
+
+    return () => {
+      try { unsubFriends(); } catch (e) {}
+      try { unsubIncoming(); } catch (e) {}
+      try { unsubOutgoing(); } catch (e) {}
+    };
+  }, []);
+
+  // If profile exists and username is missing, prompt user to set one
+  useEffect(() => {
+    if (profile && !((profile as any).username)) {
+      setUsernameModalVisible(true);
+    }
+  }, [profile]);
+
+  // NOTE: Real-time listeners above keep `friendsList`, `incomingRequests`, and `outgoingRequests` up to date
 
   // Reload profile when screen comes into focus (to sync coins)
   useFocusEffect(
@@ -187,6 +240,58 @@ export default function HomeScreen() {
     </View>
     
     {/* Friends Modal */}
+    {/* Username setup modal (prompt if user has no username) */}
+    <Modal
+      visible={usernameModalVisible}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={() => setUsernameModalVisible(false)}
+    >
+      <View style={styles.modalBackdrop}>
+        <View style={styles.modalCard}>
+          <Text style={styles.modalTitle}>Choose a username</Text>
+          <TextInput
+            value={newUsername}
+            onChangeText={setNewUsername}
+            placeholder="username"
+            placeholderTextColor="#9ca3af"
+            style={styles.searchInput}
+            autoCapitalize="none"
+          />
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+            <TouchableOpacity
+              style={styles.smallButtonOutline}
+              onPress={() => setUsernameModalVisible(false)}
+            >
+              <Text style={styles.smallButtonOutlineText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.smallButton}
+              onPress={async () => {
+                const user = auth.currentUser;
+                if (!user) return;
+                if (!newUsername.trim()) return Alert.alert('Enter a username');
+                const res = await setUsername(user.uid, newUsername.trim());
+                if (!res.success) {
+                  if (res.error === 'taken') {
+                    Alert.alert('That username is already taken');
+                  } else {
+                    Alert.alert('Unable to set username');
+                  }
+                  return;
+                }
+                // Refresh profile
+                const p = await getUserProfile(user.uid);
+                setProfile(p as any);
+                setUsernameModalVisible(false);
+              }}
+            >
+              <Text style={styles.smallButtonText}>Save</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
     <Modal
       visible={friendsModalVisible}
       animationType="slide"
@@ -196,8 +301,151 @@ export default function HomeScreen() {
       <View style={styles.modalBackdrop}>
         <View style={styles.modalCard}>
           <Text style={styles.modalTitle}>Friends</Text>
+          {/* Search / Send Friend Request */}
+          <View style={{ marginBottom: 12 }}>
+            <TextInput
+              value={searchUsername}
+              onChangeText={setSearchUsername}
+              placeholder="Enter a username"
+              placeholderTextColor="#9ca3af"
+              style={styles.searchInput}
+              autoCapitalize="none"
+            />
+            <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+              <TouchableOpacity
+                style={styles.smallButton}
+                onPress={async () => {
+                  if (!searchUsername.trim()) return Alert.alert('Enter a username');
+                  const result = await getUserByUsername(searchUsername.trim());
+                  if (!result) {
+                    setSearchResult(null);
+                    return Alert.alert('We couldn\'t find that user. Invite them to AmiGOes!');
+                  }
+                  setSearchResult(result);
+                }}
+              >
+                <Text style={styles.smallButtonText}>Search</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.smallButtonOutline}
+                onPress={async () => {
+                  const user = auth.currentUser;
+                  if (!user) return Alert.alert('Not signed in');
+                  const username = searchUsername.trim();
+                  if (!username) return Alert.alert('Enter a username');
+                  const res = await sendFriendRequest(user.uid, username);
+                  if (!res.success) {
+                    if (res.error === 'not-found') {
+                      Alert.alert('We couldn\'t find that user. Invite them to AmiGOes!');
+                    } else if (res.error === 'self') {
+                      Alert.alert('You cannot friend yourself');
+                    } else if (res.error === 'already-friends') {
+                      Alert.alert('Already friends');
+                    } else if (res.error === 'request-exists') {
+                      Alert.alert('A pending request already exists');
+                    } else {
+                      Alert.alert('Error sending request');
+                    }
+                    return;
+                  }
+                  Alert.alert('Friend request sent');
+                }}
+              >
+                <Text style={styles.smallButtonOutlineText}>Send Request</Text>
+              </TouchableOpacity>
+            </View>
+
+            {searchResult ? (
+              <View style={[styles.friendCard, { marginTop: 8 }]}> 
+                <View style={styles.friendInfo}>
+                  <View style={styles.friendAvatar}>
+                    <Text style={styles.friendAvatarText}>{(searchResult.username || 'U').charAt(0)}</Text>
+                  </View>
+                  <View style={styles.friendText}>
+                    <Text style={styles.friendName}>{searchResult.username}</Text>
+                    <Text style={styles.friendLevel}>{searchResult.email || ''}</Text>
+                  </View>
+                </View>
+              </View>
+            ) : null}
+          </View>
+
+          {/* Incoming requests */}
+          <Text style={[styles.modalTitle, { marginTop: 6, marginBottom: 6 }]}>Incoming</Text>
           <FlatList
-            data={FRIENDS}
+            data={incomingRequests}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={styles.friendCard}>
+                <View style={styles.friendInfo}>
+                  <View style={styles.friendAvatar}>
+                    <Text style={styles.friendAvatarText}>{((item.fromUsername || item.from) || '').charAt(0)}</Text>
+                  </View>
+                  <View style={styles.friendText}>
+                    <Text style={styles.friendName}>Friend request from: {item.fromUsername || item.from || 'Unknown'}</Text>
+                    <Text style={styles.friendLevel}>Incoming request</Text>
+                  </View>
+                </View>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <TouchableOpacity
+                    style={styles.smallButton}
+                    onPress={async () => {
+                      const user = auth.currentUser;
+                      if (!user) return;
+                      const res = await acceptFriendRequest(item.id, user.uid);
+                      if (res.success) {
+                        Alert.alert('Friend added');
+                      } else {
+                        Alert.alert('Unable to accept');
+                      }
+                    }}
+                  >
+                    <Text style={styles.smallButtonText}>Accept</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.smallButtonOutline}
+                    onPress={async () => {
+                      const user = auth.currentUser;
+                      if (!user) return;
+                      const res = await declineFriendRequest(item.id, user.uid);
+                      if (res.success) {
+                        Alert.alert('Request declined');
+                      } else {
+                        Alert.alert('Unable to decline');
+                      }
+                    }}
+                  >
+                    <Text style={styles.smallButtonOutlineText}>Decline</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+          />
+
+          {/* Outgoing requests */}
+          <Text style={[styles.modalTitle, { marginTop: 6, marginBottom: 6 }]}>Outgoing</Text>
+          <FlatList
+            data={outgoingRequests}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={styles.friendCard}>
+                <View style={styles.friendInfo}>
+                  <View style={styles.friendAvatar}>
+                    <Text style={styles.friendAvatarText}>{((item.toUsername || item.to) || '').charAt(0)}</Text>
+                  </View>
+                  <View style={styles.friendText}>
+                    <Text style={styles.friendName}>{item.toUsername || item.to || 'Unknown'}</Text>
+                    <Text style={styles.friendLevel}>Pending request</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+          />
+
+          {/* Friends list */}
+          <Text style={[styles.modalTitle, { marginTop: 6, marginBottom: 6 }]}>Friends</Text>
+          <FlatList
+            data={friendsList}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <TouchableOpacity
@@ -206,10 +454,10 @@ export default function HomeScreen() {
                   router.push({
                     pathname: '/friend-profile',
                     params: {
-                      id: item.id,
-                      name: item.name,
-                      level: item.level,
-                      status: item.status,
+                      id: item.uid || item.id,
+                      name: item.username || item.uid,
+                      level: 1,
+                      status: 'Friend',
                     },
                   });
                 }}
@@ -217,14 +465,14 @@ export default function HomeScreen() {
                 <View style={styles.friendCard}>
                   <View style={styles.friendInfo}>
                     <View style={styles.friendAvatar}>
-                      <Text style={styles.friendAvatarText}>{item.name.charAt(0)}</Text>
+                      <Text style={styles.friendAvatarText}>{(item.username || item.uid || 'U').charAt(0)}</Text>
                     </View>
                     <View style={styles.friendText}>
-                      <Text style={styles.friendName}>{item.name}</Text>
-                      <Text style={styles.friendLevel}>Level {item.level}</Text>
+                      <Text style={styles.friendName}>{item.username || item.uid}</Text>
+                      <Text style={styles.friendLevel}>Friend</Text>
                     </View>
                   </View>
-                  <Text style={styles.friendStatus}>{item.status}</Text>
+                  <Text style={styles.friendStatus}>{item.email || ''}</Text>
                 </View>
               </TouchableOpacity>
             )}
@@ -496,6 +744,41 @@ const styles = StyleSheet.create({
     color: '#facc15',
     fontWeight: '700',
     marginTop: 6,
+  },
+  searchInput: {
+    backgroundColor: '#071028',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    color: '#e5e7eb',
+    borderWidth: 1,
+    borderColor: '#111827',
+  },
+  smallButton: {
+    backgroundColor: '#22c55e',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  smallButtonText: {
+    color: '#022c22',
+    fontWeight: '700',
+  },
+  smallButtonOutline: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#facc15',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  smallButtonOutlineText: {
+    color: '#facc15',
+    fontWeight: '700',
   },
 
 });

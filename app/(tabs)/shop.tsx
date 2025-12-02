@@ -2,19 +2,19 @@ import { useFocusEffect } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Animated,
-  Image,
-  ImageBackground,
-  Modal,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    Animated,
+    Image,
+    ImageBackground,
+    Modal,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { auth, db } from '../firebaseConfig';
-import { addItem, getInventory } from '../inventoryService';
+import { addItem, getInventory, subscribe } from '../inventoryService';
 import { updateCoins } from '../userProfileService';
 
 interface GachaItem {
@@ -55,7 +55,7 @@ export default function ShopScreen() {
   const [pulling, setPulling] = useState(false);
   const [resultItem, setResultItem] = useState<GachaItem | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const [purchasedItems, setPurchasedItems] = useState<Set<number>>(new Set());
+  const [ownedSourceIds, setOwnedSourceIds] = useState<Set<string>>(new Set());
   const spinAnim = useRef(new Animated.Value(0)).current;
 
   // Load coins from Firebase
@@ -84,6 +84,31 @@ export default function ShopScreen() {
   useEffect(() => {
     loadCoins();
   }, [loadCoins]);
+
+  // Load owned inventory and subscribe to changes so we can disable buy buttons for owned items
+  useEffect(() => {
+    let unsub: (() => void) | undefined;
+    (async () => {
+      try {
+        const items = await getInventory();
+        const ids = new Set(items.map(i => String(i.sourceId)));
+        setOwnedSourceIds(ids);
+      } catch (e) {
+        console.warn('Failed to load inventory for ownership check', e);
+      }
+
+      try {
+        unsub = subscribe((items) => {
+          const ids = new Set(items.map(i => String(i.sourceId)));
+          setOwnedSourceIds(ids);
+        });
+      } catch (e) {
+        // ignore
+      }
+    })();
+
+    return () => { if (unsub) unsub(); };
+  }, []);
 
   // Reload coins when screen comes into focus (to sync with home screen)
   useFocusEffect(
@@ -117,7 +142,13 @@ export default function ShopScreen() {
 
     const newCoins = coins - item.price;
     setCoins(newCoins);
-    setPurchasedItems(new Set([...purchasedItems, item.id]));
+    // Defensive ownership check
+    if (ownedSourceIds.has(String(item.id))) {
+      alert('You already own this item');
+      return;
+    }
+    // optimistic local update of owned ids
+    setOwnedSourceIds(new Set(Array.from(ownedSourceIds).concat([String(item.id)])));
 
     // Update coins in Firebase
     try {
@@ -128,8 +159,10 @@ export default function ShopScreen() {
 
     // add to shared inventory (image or name will be stored)
     try {
+      // use a stable doc id so duplicates are prevented (subcollection doc id)
+      const docId = `item-${item.id}`;
       await addItem({
-        id: `${Date.now()}-${item.id}`,
+        id: docId,
         name: item.name,
         image: item.image,
         sourceId: item.id,
@@ -182,20 +215,21 @@ export default function ShopScreen() {
       try {
         const currentInventory = await getInventory();
         const itemExists = currentInventory.some(
-          (inventoryItem) => 
-            inventoryItem.name === item.name || 
-            (inventoryItem.sourceId && inventoryItem.sourceId === item.id)
+          (inventoryItem) => inventoryItem.name === item.name || (inventoryItem.sourceId && inventoryItem.sourceId === item.id)
         );
 
         if (!itemExists) {
           // add gacha result to inventory only if it doesn't exist
+          const docId = `gacha-${item.id}`;
           await addItem({
-            id: `${Date.now()}-gacha-${item.id}`,
+            id: docId,
             name: item.name,
             image: item.image,
             rarity: item.rarity,
             sourceId: item.id,
           });
+          // update owned set optimistically
+          setOwnedSourceIds(prev => new Set(Array.from(prev).concat([String(item.id)])));
         }
       } catch (e) {
         console.warn('Failed to check/add gacha item to inventory', e);
@@ -229,7 +263,7 @@ export default function ShopScreen() {
             />
 
             {SHOP_ITEMS.map((item, index) => {
-              const isPurchased = purchasedItems.has(item.id);
+              const isPurchased = ownedSourceIds.has(String(item.id));
               // Calculate position for grid layout (3 items per row)
               const row = Math.floor(index / 3);
               const col = index % 3;
@@ -270,7 +304,7 @@ export default function ShopScreen() {
                         resizeMode="contain"
                       />
                     ) : (
-                      <Text style={styles.purchasedText}>Purchased</Text>
+                      <Text style={styles.purchasedText}>Owned</Text>
                     )}
                   </TouchableOpacity>
                 </View>

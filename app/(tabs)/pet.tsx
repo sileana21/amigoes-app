@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { auth } from '../firebaseConfig';
 import { getInventory, InventoryItem, subscribe } from '../inventoryService';
-import { getUserProfile, updatePetName } from '../userProfileService';
+import { getUserProfile, setEquippedItems, updatePetName } from '../userProfileService';
 
 export default function PetScreen() {
   const TOTAL_SLOTS = 12;
@@ -19,6 +19,21 @@ export default function PetScreen() {
       const items = await getInventory();
       setInventory(items);
       unsub = subscribe((items) => setInventory(items));
+
+      // Load equipped item from profile and map to inventory
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          const profile = await getUserProfile(user.uid);
+          const equippedId = profile?.equippedItems?.equippedId;
+          if (equippedId) {
+            const found = items.find(i => i.id === equippedId);
+            if (found) setEquippedItem(found);
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
     })();
 
     return () => {
@@ -199,11 +214,31 @@ export default function PetScreen() {
                   // Deselect and unequip
                   setSelectedSlot(null);
                   setEquippedItem(null);
+                  // persist unequip
+                  (async () => {
+                    const user = auth.currentUser;
+                    if (!user) return;
+                    try {
+                      await setEquippedItems(user.uid, { equippedId: null });
+                    } catch (e) {
+                      // ignore
+                    }
+                  })();
                 } else {
                   // Select and equip the item
                   setSelectedSlot(item.slotIndex);
                   if (item.item) {
                     setEquippedItem(item.item);
+                    // persist equipped item
+                    (async () => {
+                      const user = auth.currentUser;
+                      if (!user) return;
+                      try {
+                        await setEquippedItems(user.uid, { equippedId: item.item?.id });
+                      } catch (e) {
+                        // ignore
+                      }
+                    })();
                   }
                 }
               }}
@@ -217,6 +252,8 @@ export default function PetScreen() {
                     style={styles.itemImage}
                     resizeMode="contain"
                   />
+                ) : item.item.sourceId ? (
+                  <Text style={styles.itemName}>{item.item.name}</Text>
                 ) : (
                   <Text style={styles.itemName}>{item.item.name}</Text>
                 )
