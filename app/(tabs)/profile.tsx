@@ -15,8 +15,6 @@ export default function ProfileScreen() {
   const [petLevel, setPetLevel] = useState<number | null>(null);
   const [totalSteps, setTotalSteps] = useState<number | null>(null);
   const [friendCount, setFriendCount] = useState<number | null>(null);
-
-
   
   useEffect(() => {
     const currentUser = auth.currentUser;
@@ -94,7 +92,7 @@ export default function ProfileScreen() {
 
           <TouchableOpacity
             style={styles.statBlock}
-            onPress={() => router.push('/achievements')} // your new screen path
+            onPress={() => router.push('/achievements')} 
           >
             <Text style={styles.statLabel}>Achievements</Text>
             <Text style={styles.statValue}>3</Text>
@@ -109,7 +107,10 @@ export default function ProfileScreen() {
         style={styles.settingsTitleImage}
       />
       <View style={styles.settingsList}>
-        <TouchableOpacity style={styles.settingItem}>
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => router.push('../../editProfileScreen')} 
+        >
           <Text style={styles.settingText}>Edit Profile</Text>
           <Text style={styles.settingArrow}>›</Text>
         </TouchableOpacity>

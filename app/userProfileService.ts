@@ -266,4 +266,12 @@ export async function getLeaderboard(limit_count: number = 50) {
     steps: doc.data().dailySteps || 0,
     rank: index + 1,
   }));
+  
+}
+
+export async function updateUserProfile(userId: string, data: { username?: string; email?: string }) {
+  if (!userId) return;
+
+  const userDoc = doc(db, 'users', userId);
+  await updateDoc(userDoc, data);
 }
