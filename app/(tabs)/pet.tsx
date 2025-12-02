@@ -109,6 +109,52 @@ export default function PetScreen() {
     return require('../../assets/images/avatar/nothing-on.png');
   };
 
+    const getItemImage = (item: InventoryItem | null) => {
+    if (!item) {
+      return require('../../assets/images/avatar/nothing-on.png');
+    }
+
+    // Check by name first
+    const name = item.name.toLowerCase();
+    if (name.includes('67') || name.includes('67-shirt')) {
+      return require('../../assets/images/accessory/67-shirt.png');
+    }
+    if (name.includes('cloudy') || name.includes('cloudy-shirt')) {
+      return require('../../assets/images/accessory/cloudy-shirt.png');
+    }
+    if (name.includes('sunny') || name.includes('sunny-shirt')) {
+      return require('../../assets/images/accessory/sunny-shirt.png');
+    }
+    if (name.includes('cowboy hat') || name.includes('cowboy-hat')) {
+      return require('../../assets/images/accessory/cowboy-hat-2.png');
+    }
+    if (name.includes('overalls')) {
+      return require('../../assets/images/accessory/overall-2.png');
+    }
+    if (name.includes('cowboy2') || name.includes('cowboy 2')) {
+      return require('../../assets/images/accessory/cowboy2-2.png');
+    }
+    if (name.includes('straw hat') || name.includes('strawhat')) {
+      return require('../../assets/images/accessory/strawhat.png');
+    }
+    if (name.includes('sombrero')) {
+      return require('../../assets/images/accessory/sombrero.png');
+    }
+    if (name.includes('blackhoodie') || name.includes('black hoodie') || name.includes('hoodie')) {
+      return require('../../assets/images/accessory/hoodie-on.png');
+    }
+    if (name.includes('pink cowboy') || name.includes('pink-cowboy')) {
+      return require('../../assets/images/accessory/pink-cowboy.png');
+    }
+    if (name.includes('maid') || name.includes('maid outfit')) {
+      return require('../../assets/images/accessory/maid-outfit.png');
+    }
+
+    // Check by image path if available (fallback)
+    // For now, default to nothing-on if we can't match
+    return require('../../assets/images/avatar/nothing-on.png');
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -243,21 +289,13 @@ export default function PetScreen() {
                 }
               }}
             >
-              {item.item ? (
-                item.item.emoji ? (
-                  <Text style={styles.itemEmoji}>{item.item.emoji}</Text>
-                ) : item.item.image ? (
-                  <Image
-                    source={item.item.image}
-                    style={styles.itemImage}
-                    resizeMode="contain"
-                  />
-                ) : item.item.sourceId ? (
-                  <Text style={styles.itemName}>{item.item.name}</Text>
-                ) : (
-                  <Text style={styles.itemName}>{item.item.name}</Text>
-                )
-              ) : null}
+              {item.item && (
+                <Image
+                  source={getItemImage(item.item)}
+                  style={styles.itemImage}
+                  resizeMode="contain"
+                />
+              )}
             </TouchableOpacity>
           )}
         />
@@ -361,7 +399,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
   },
   itemName: {
-    color: '#e5e7eb',
+    color: '#010612ff',
     fontSize: 12,
     textAlign: 'center',
   },
