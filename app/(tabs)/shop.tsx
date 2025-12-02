@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
   pullButtonText: {
     color: '#022c22',
     fontWeight: '600',
-    fontSize: 16,
+    fontSize: 12,
   },
   modalBackdrop: {
     flex: 1,
