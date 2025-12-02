@@ -90,10 +90,13 @@ export default function ProfileScreen() {
             <Text style={styles.statValue}>{friendCount ?? 0}</Text>
           </View>
 
-          <View style={styles.statBlock}>
+          <TouchableOpacity
+            style={styles.statBlock}
+            onPress={() => router.push('/achievements')} // your new screen path
+          >
             <Text style={styles.statLabel}>Achievements</Text>
             <Text style={styles.statValue}>3</Text>
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
 
