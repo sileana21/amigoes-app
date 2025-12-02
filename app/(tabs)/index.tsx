@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, FlatList, Image, ImageBackground, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { auth, db } from '../firebaseConfig';
 import StepTracker from "../stepCounter";
-import { acceptFriendRequest, declineFriendRequest, getUserByUsername, getUserProfile, sendFriendRequest, setUsername, updateDailySteps } from '../userProfileService';
+import { acceptFriendRequest, declineFriendRequest, getUserByUsername, getUserProfile, sendFriendRequest, setUsername, updateDailySteps, updateChallengeCoins } from '../userProfileService';
 
 
 type UserProfile = {
@@ -15,6 +15,43 @@ type UserProfile = {
   petLevel: number;
   dailySteps?: number;
 };
+
+type Challenge = {
+  id: string;
+  title: string;
+  description: string;
+  reward: number; // coins
+  type: 'steps' | 'gacha';
+  completed?: boolean;
+  target?: number;
+};
+
+const INITIAL_CHALLENGES: Challenge[] = [
+  {
+    id: 'walkSteps',
+    title: 'Walk 500 steps',
+    description: 'Complete today\'s walk to earn bonus coins for your amiGO.',
+    reward: 50,
+    type: 'steps',
+    target: 500,
+  },
+  {
+    id: 'walkMoreSteps',
+    title: 'Walk 3,000 steps',
+    description: 'Complete today\'s walk to earn bonus coins for your amiGO',
+    reward: 300,
+    type: 'steps',
+    target: 3000,
+  },
+  {
+    id: 'walkEvenMoreSteps',
+    title: 'Walk 5,000 steps',
+    description: 'Complete today\'s walk to earn bonus coins for your amiGO',
+    reward: 500,
+    type: 'steps',
+    target: 5000,
+  },
+];
 
 const DAILY_GOAL = 10000; // you can change this later
 
@@ -33,7 +70,20 @@ export default function HomeScreen() {
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
-  const [todaySteps, setTodaySteps] = useState(0); // placeholder for now
+  const [todaySteps, setTodaySteps] = useState(0); 
+  const [challenges, setChallenges] = useState<Challenge[]>(INITIAL_CHALLENGES);
+
+  const giveCoins = async (amount: number) => {
+    setProfile(prev => prev ? { ...prev, coins: (prev.coins || 0) + amount } : prev);
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        await updateChallengeCoins(user.uid, amount);
+      } catch (e) {
+        console.log('Error updating coins:', e);
+      }
+    }
+  };
 
   const loadProfile = useCallback(async () => {
     const user = auth.currentUser;
@@ -121,6 +171,19 @@ export default function HomeScreen() {
     }, [loadProfile])
   );
 
+  useEffect(() => {
+  setChallenges(prev =>
+    prev.map(ch => {
+      if (ch.type === 'steps' && !ch.completed && todaySteps >= (ch.target || 0)) {
+        giveCoins(ch.reward);
+        return { ...ch, completed: true };
+      }
+      return ch;
+    })
+  );
+}, [todaySteps]);
+
+
   const petName = profile?.petName ?? 'Sunny';
   const petLevel = profile?.petLevel ?? 1;
   const coins = profile?.coins ?? 0;
@@ -169,34 +232,24 @@ export default function HomeScreen() {
 </TouchableOpacity>
       </View>
 
-      {/* Daily challenge */}
       <View style={styles.section}>
-        <Image
-          source={require('../../assets/images/challenge-title.png')}
-          style={styles.challengeTitleImage}
-        />
-        <View style={styles.challengeCard}>
-          <Text style={styles.challengeTitle}>Walk 3,000 steps</Text>
-          <Text style={styles.challengeText}>
-            Complete today&apos;s walk to earn bonus coins for your amiGO.
-          </Text>
-          <Text style={styles.challengeReward}>Reward: +50 coins</Text>
-        </View>
-        <View style={styles.challengeCard}>
-          <Text style={styles.challengeTitle}>Feed your pet</Text>
-          <Text style={styles.challengeText}>
-            Keep your AmiGO happy and healthy by feeding them treats.
-          </Text>
-          <Text style={styles.challengeReward}>Reward: +20 coins</Text>
-        </View>
-        <View style={styles.challengeCard}>
-          <Text style={styles.challengeTitle}>Roll on the gacha</Text>
-          <Text style={styles.challengeText}>
-            Roll for an item for your AmiGO!
-          </Text>
-          <Text style={styles.challengeReward}>Reward: +10 coins</Text>
-        </View>
-      </View>
+  <Image
+    source={require('../../assets/images/challenge-title.png')}
+    style={styles.challengeTitleImage}
+  />
+
+  {challenges.map(ch => (
+  <View key={ch.id} style={styles.challengeCard}>
+    <Text style={styles.challengeTitle}>
+      {ch.title} {ch.completed ? '✅' : ''}
+    </Text>
+    <Text style={styles.challengeText}>{ch.description}</Text>
+    <Text style={styles.challengeReward}>Reward: +{ch.reward} coins</Text>
+
+  </View>
+))}
+</View>
+
 
       {/* Steps + progress */}
       <View style={styles.section}>
