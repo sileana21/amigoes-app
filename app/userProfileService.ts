@@ -275,3 +275,10 @@ export async function updateUserProfile(userId: string, data: { username?: strin
   const userDoc = doc(db, 'users', userId);
   await updateDoc(userDoc, data);
 }
+
+export const updateChallengeCoins = async (uid: string, amount: number) => {
+  const userRef = doc(db, 'users', uid);
+  await updateDoc(userRef, {
+    coins: increment(amount),
+  });
+};
