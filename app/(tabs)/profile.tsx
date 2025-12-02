@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { Image, ImageBackground, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ImageBackground, Modal, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { auth, db } from '../firebaseConfig';
 
 
@@ -15,6 +15,7 @@ export default function ProfileScreen() {
   const [totalSteps, setTotalSteps] = useState<number | null>(null);
   const [friendCount, setFriendCount] = useState<number | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [aboutModalVisible, setAboutModalVisible] = useState(false);
   
   useEffect(() => {
     const currentUser = auth.currentUser;
@@ -106,6 +107,7 @@ export default function ProfileScreen() {
         source={require('../../assets/images/settings-title.png')}
         style={styles.settingsTitleImage}
       />
+
       <View style={styles.settingsList}>
         <TouchableOpacity 
           style={styles.settingItem}
@@ -114,6 +116,7 @@ export default function ProfileScreen() {
           <Text style={styles.settingText}>Edit Profile</Text>
           <Text style={styles.settingArrow}>›</Text>
         </TouchableOpacity>
+
         <View style={styles.settingItem}>
           <Text style={styles.settingText}> Push Notifications</Text>
           <Switch
@@ -123,11 +126,62 @@ export default function ProfileScreen() {
             thumbColor="#fff"
           />
         </View>
-        <TouchableOpacity style={styles.settingItem}>
+
+        <TouchableOpacity
+          style={styles.settingItem}
+          onPress={() => setAboutModalVisible(true)}
+        >
           <Text style={styles.settingText}>About</Text>
           <Text style={styles.settingArrow}>›</Text>
         </TouchableOpacity>
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={aboutModalVisible}
+        onRequestClose={() => setAboutModalVisible(false)}
+      >
+        <View style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          padding: 24,
+        }}>
+          <View style={{
+            backgroundColor: '#fff',
+            borderRadius: 18,
+            padding: 20,
+            width: '100%',
+          }}>
+            <Text style={{ fontSize: 18, fontWeight: '700', marginBottom: 12 }}>
+              About This App
+            </Text>
+            <Text style={{ fontSize: 14, marginBottom: 20 }}>
+              We wanted to make exercise more fun and engaging so we created this app:
+
+              Amigoes is a mobile fitness app that motivates users to walk more by turning daily steps into a fun, gamified experience!
+              
+              {"\n"}
+              {"\n"}
+
+              Our Contact: a bunch of college students 
+            </Text>
+            <TouchableOpacity
+              style={{
+                backgroundColor: '#62c1e5',
+                paddingVertical: 10,
+                borderRadius: 12,
+                alignItems: 'center',
+              }}
+              onPress={() => setAboutModalVisible(false)}
+            >
+              <Text style={{ color: '#fff', fontWeight: '700' }}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       {/* Logout Button */}
       <TouchableOpacity
