@@ -244,21 +244,26 @@ export async function updatePetName(userId: string, petName: string) {
   await updateDoc(ref, { petName });
 }
 
-export async function updateDailySteps(userId: string, dailySteps: number) {
+export async function updateDailySteps(userId: string, newDailySteps: number) {
   if (!userId) return;
   const ref = doc(db, 'users', userId);
-  // Update the user's dailySteps value and increment totalSteps so we keep a running total.
-  // This assumes updateDailySteps is called for each step (delta of +1). If you batch updates,
-  // consider using a different API to supply the delta.
   try {
-    await updateDoc(ref, { dailySteps, totalSteps: increment(1) });
-  } catch (e) {
-    // Fallback: if totalSteps doesn't exist, set dailySteps and ensure totalSteps remains present
-    try {
-      await updateDoc(ref, { dailySteps });
-    } catch (err) {
-      console.warn('Failed to update dailySteps', err);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+
+    const prevDaily = snap.data()?.dailySteps || 0;
+    const delta = newDailySteps - prevDaily;
+
+    if (delta > 0) {
+      await updateDoc(ref, {
+        dailySteps: newDailySteps,
+        totalSteps: increment(delta),
+      });
+    } else {
+      await updateDoc(ref, { dailySteps: newDailySteps });
     }
+  } catch (e) {
+    console.warn('Failed to update dailySteps', e);
   }
 }
 

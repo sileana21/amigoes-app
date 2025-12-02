@@ -1,7 +1,7 @@
 
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Image, ImageBackground, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { auth, db } from '../firebaseConfig';
@@ -17,16 +17,17 @@ export default function ProfileScreen() {
   const [friendCount, setFriendCount] = useState<number | null>(null);
 
 
+  
   useEffect(() => {
-    const fetchUserData = async () => {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return;
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
 
-      setUserEmail(currentUser.email ?? null);
+    setUserEmail(currentUser.email ?? null);
 
-      const ref = doc(db, 'users', currentUser.uid);
-      const snap = await getDoc(ref);
+    const ref = doc(db, 'users', currentUser.uid);
 
+    // Real-time listener
+    const unsubscribe = onSnapshot(ref, (snap) => {
       if (snap.exists()) {
         const data = snap.data();
         setUsername(data.username || null);
@@ -36,10 +37,11 @@ export default function ProfileScreen() {
         setTotalSteps(data.totalSteps ?? data.dailySteps ?? 0);
         setFriendCount(data.friendCount ?? 0);
       }
-    };
+    });
 
-    fetchUserData();
-  }, []);
+  // Clean up listener when component unmounts
+  return () => unsubscribe();
+}, []);
 
 
   return (
