@@ -52,13 +52,16 @@ const RARITY_COLORS = {
 export default function ShopScreen() {
   const [coins, setCoins] = useState(0);
   const [loadingCoins, setLoadingCoins] = useState(true);
-  const [pulling, setPulling] = useState(false);
+  const [singlePulling, setSinglePulling] = useState(false);
+  const [tenPulling, setTenPulling] = useState(false);
   const [resultItem, setResultItem] = useState<GachaItem | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [ownedSourceIds, setOwnedSourceIds] = useState<Set<string>>(new Set());
   const [ratesModalVisible, setRatesModalVisible] = useState(false);
   const spinAnim = useRef(new Animated.Value(0)).current;
   const [timeLeft, setTimeLeft] = useState<string>('00:00:00');
+  const [resultItems, setResultItems] = useState<GachaItem[]>([]); // for multi-pull
+  const [showMultiResult, setShowMultiResult] = useState(false);
 
   // Load coins from Firebase
   const loadCoins = useCallback(async () => {
@@ -198,218 +201,235 @@ export default function ShopScreen() {
     alert(`You bought: ${item.name}!`);
   };
 
-  const handlePull = async () => {
-    const user = auth.currentUser;
-    if (!user) {
-      alert("Please log in to use the gacha!");
-      return;
-    }
+const handleSinglePull = async () => {
+  if (coins < 100) return;
+  setSinglePulling(true);
+  const newCoins = coins - 100;
+  setCoins(newCoins);
 
-    if (coins < 100) return;
-    
-    setPulling(true);
-    const newCoins = coins - 100;
-    setCoins(newCoins);
+  const user = auth.currentUser;
+  if (user) await updateCoins(user.uid, newCoins);
 
-    // Update coins in Firebase
-    try {
-      await updateCoins(user.uid, newCoins);
-    } catch (e) {
-      console.warn('Failed to update coins:', e);
-    }
+  Animated.loop(
+    Animated.timing(spinAnim, {
+      toValue: 1,
+      duration: 100,
+      useNativeDriver: true,
+    })
+  ).start();
 
-    // Animate spinning
-    Animated.loop(
-      Animated.timing(spinAnim, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      })
-    ).start();
+  setTimeout(async () => {
+    const item = getRandomItem();
+    setResultItem(item);
+    setShowResult(true);
+    setSinglePulling(false);
+    spinAnim.setValue(0);
 
-    // Simulate pull duration
-    setTimeout(async () => {
+    // Add item to inventory...
+  }, 2000);
+};
+
+const handleTenPull = async () => {
+  if (coins < 1000) return;
+  setTenPulling(true);
+  const newCoins = coins - 1000;
+  setCoins(newCoins);
+
+  const user = auth.currentUser;
+  if (user) await updateCoins(user.uid, newCoins);
+
+  Animated.loop(
+    Animated.timing(spinAnim, {
+      toValue: 1,
+      duration: 100,
+      useNativeDriver: true,
+    })
+  ).start();
+
+  setTimeout(async () => {
+    const pulledItems: GachaItem[] = [];
+    const currentInventory = await getInventory();
+    const ownedIds = new Set(currentInventory.map(i => i.sourceId));
+
+    for (let i = 0; i < 10; i++) {
       const item = getRandomItem();
-      setResultItem(item);
-      setShowResult(true);
-      setPulling(false);
-      spinAnim.setValue(0);
+      pulledItems.push(item);
 
-      // Check if item already exists in inventory before adding
-      try {
-        const currentInventory = await getInventory();
-        const itemExists = currentInventory.some(
-          (inventoryItem) => inventoryItem.name === item.name || (inventoryItem.sourceId && inventoryItem.sourceId === item.id)
-        );
-
-        if (!itemExists) {
-          // add gacha result to inventory only if it doesn't exist
-          const docId = `gacha-${item.id}`;
-          await addItem({
-            id: docId,
-            name: item.name,
-            image: item.image,
-            rarity: item.rarity,
-            sourceId: item.id,
-          });
-          // update owned set optimistically
-          setOwnedSourceIds(prev => new Set(Array.from(prev).concat([String(item.id)])));
-        }
-      } catch (e) {
-        console.warn('Failed to check/add gacha item to inventory', e);
+      if (!ownedIds.has(item.id)) {
+        await addItem({
+          id: `gacha-${item.id}-${Date.now()}-${i}`,
+          name: item.name,
+          image: item.image,
+          rarity: item.rarity,
+          sourceId: item.id,
+        });
+        setOwnedSourceIds(prev => new Set([...prev, String(item.id)]));
       }
-    }, 2000);
-  };
+    }
+
+    setResultItems(pulledItems);
+    setShowMultiResult(true);
+    setTenPulling(false);
+    spinAnim.setValue(0);
+  }, 2000);
+};
+
 
   return (
     <ImageBackground
           source={require('../../assets/images/bg.png')}
           style={styles.background}
           resizeMode="cover"
-        >
+    >
 
-      <SafeAreaView style={styles.safeArea}>
-        <ScrollView style={styles.scrollContent}>
-          <Text style={styles.title}>Your Coins</Text>
-          <View style={styles.coinRow}>
-            <Image
-              source={require('../../assets/images/coin.png')}
-              style={styles.coinImage}
-            />
-            <Text style={styles.coinAmount}>{coins}</Text>
-          </View>
-
-
-          <View style={styles.shopContainer}>
-            <Image
-              source={require('../../assets/images/shop.png')}
-              style={styles.shopImage}
-            />
-
-            {SHOP_ITEMS.map((item, index) => {
-              const isPurchased = ownedSourceIds.has(String(item.id));
-              // Calculate position for grid layout (3 items per row)
-              const row = Math.floor(index / 3);
-              const col = index % 3;
-              const baseTop = 110;
-              const baseLeft = 65;
-              const rowHeight = 125;
-              const colWidth = 108;
-              
-              const itemStyle = {
-                ...styles.itemWrapper,
-                top: baseTop + (row * rowHeight),
-                left: baseLeft + (col * colWidth),
-              };
-              
-              return (
-                <View key={item.id} style={itemStyle}>
-                  {/* Price */}
-                  <Text style={styles.itemPrice}>{item.price} coins</Text>
-
-                  <Image
-                    source={item.image}
-                    style={styles.slotItem}
-                    resizeMode="contain"
-                  />
-
-                  <TouchableOpacity
-                    style={[
-                      styles.buyButton,
-                      isPurchased && styles.buyButtonDisabled,
-                    ]}
-                    onPress={() => !isPurchased && buyItem(item)}
-                    disabled={isPurchased}
-                  >
-                    {!isPurchased ? (
-                      <Image
-                        source={require('../../assets/images/buy-button.png')}
-                        style={styles.buyButtonImage}
-                        resizeMode="contain"
-                      />
-                    ) : (
-                      <Text style={styles.purchasedText}>Owned</Text>
-                    )}
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-          </View>
-
-          <View style={{ marginVertical: 0, alignItems: 'center' }}>
-            <Text style={{ color: '#ffffff', fontWeight: '700', fontSize: 16 }}>
-              Daily Store Refresh In:
-            </Text>
-            <Text style={{ color: '#facc15', fontWeight: '800', fontSize: 20 }}>
-              {timeLeft}
-            </Text>
-          </View>
-
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView style={styles.scrollContent}>
+        <Text style={styles.title}>Your Coins</Text>
+        <View style={styles.coinRow}>
           <Image
-              source={require('../../assets/images/gacha-title.png')}
-              style={styles.gachaTitle}
-              resizeMode="contain"
-            />
+            source={require('../../assets/images/coin.png')}
+            style={styles.coinImage}
+          />
+          <Text style={styles.coinAmount}>{coins}</Text>
+        </View>
+
+
+        <View style={styles.shopContainer}>
           <Image
-            source={require('../../assets/images/limited-image.png')}
-            style={styles.limitedBanner}
+            source={require('../../assets/images/shop.png')}
+            style={styles.shopImage}
+          />
+
+          {SHOP_ITEMS.map((item, index) => {
+            const isPurchased = ownedSourceIds.has(String(item.id));
+            // Calculate position for grid layout (3 items per row)
+            const row = Math.floor(index / 3);
+            const col = index % 3;
+            const baseTop = 110;
+            const baseLeft = 65;
+            const rowHeight = 125;
+            const colWidth = 108;
+              
+            const itemStyle = {
+              ...styles.itemWrapper,
+              top: baseTop + (row * rowHeight),
+              left: baseLeft + (col * colWidth),
+            };
+            
+            return (
+              <View key={item.id} style={itemStyle}>
+                {/* Price */}
+                <Text style={styles.itemPrice}>{item.price} coins</Text>
+
+                <Image
+                  source={item.image}
+                  style={styles.slotItem}
+                  resizeMode="contain"
+                />
+
+                <TouchableOpacity
+                  style={[
+                    styles.buyButton,
+                    isPurchased && styles.buyButtonDisabled,
+                  ]}
+                  onPress={() => !isPurchased && buyItem(item)}
+                  disabled={isPurchased}
+                >
+                  {!isPurchased ? (
+                    <Image
+                      source={require('../../assets/images/buy-button.png')}
+                      style={styles.buyButtonImage}
+                      resizeMode="contain"
+                    />
+                  ) : (
+                    <Text style={styles.purchasedText}>Owned</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            );
+          })}
+        </View>
+
+        <View style={{ marginVertical: 0, alignItems: 'center' }}>
+          <Text style={{ color: '#ffffff', fontWeight: '700', fontSize: 16 }}>
+            Daily Store Refresh In:
+          </Text>
+          <Text style={{ color: '#facc15', fontWeight: '800', fontSize: 20 }}>
+            {timeLeft}
+          </Text>
+        </View>
+
+        <Image
+            source={require('../../assets/images/gacha-title.png')}
+            style={styles.gachaTitle}
             resizeMode="contain"
           />
-          {/* Gacha Pull Section */}
-          {/* Rarity Info */}
-          <View style={styles.gachaContainer}>
-            <Text style={styles.gachaSubtitle}>
-              Spend 100 coins per pull to get a random item from the shop. Each item has a rarity and a chance of appearing:
-            </Text>
 
-            <TouchableOpacity
-              style={styles.ratesButton}
-              onPress={() => setRatesModalVisible(true)}
-            >
-              <Text style={styles.ratesButtonText}>View Rates</Text>
-            </TouchableOpacity>
-            <Modal
-              visible={ratesModalVisible}
-              transparent
-              animationType="slide"
-              onRequestClose={() => setRatesModalVisible(false)}
-            >
-              <View style={styles.modalBackdrop}>
-                <View style={styles.ratesModalCard}>
-                  <Text style={styles.ratesTitle}>Gacha Rates</Text>
-                  
-                  {GACHA_ITEMS.map(item => (
-                    <Text key={item.id} style={styles.ratesText}>
-                      {item.name} ({item.rarity.toUpperCase()}) - {item.probability}%
-                    </Text>
-                  ))}
+        <Image
+          source={require('../../assets/images/limited-image.png')}
+          style={styles.limitedBanner}
+          resizeMode="contain"
+        />
 
-                  <TouchableOpacity
-                    style={styles.okButton}
-                    onPress={() => setRatesModalVisible(false)}
-                  >
-                    <Text style={styles.okButtonText}>Close</Text>
-                  </TouchableOpacity>
-                </View>
+        {/* Gacha Pull Section */}
+        {/* Rarity Info */}
+        <View style={styles.gachaContainer}>
+          <Text style={styles.gachaSubtitle}>
+            Spend 100 coins per pull to get a random item from the shop. Each item has a rarity and a chance of appearing:
+          </Text>
+
+          <TouchableOpacity
+            style={styles.ratesButton}
+            onPress={() => setRatesModalVisible(true)}
+          >
+            <Text style={styles.ratesButtonText}>View Rates</Text>
+          </TouchableOpacity>
+            
+          <Modal
+            visible={ratesModalVisible}
+            transparent
+            animationType="slide"
+            onRequestClose={() => setRatesModalVisible(false)}
+            >
+            <View style={styles.modalBackdrop}>
+              <View style={styles.ratesModalCard}>
+                <Text style={styles.ratesTitle}>Gacha Rates</Text>
+                
+                {GACHA_ITEMS.map(item => (
+                  <Text key={item.id} style={styles.ratesText}>
+                    {item.name} ({item.rarity.toUpperCase()}) - {item.probability}%
+                  </Text>
+                ))}
+
+                <TouchableOpacity
+                  style={styles.okButton}
+                  onPress={() => setRatesModalVisible(false)}
+                >
+                  <Text style={styles.okButtonText}>Close</Text>
+                </TouchableOpacity>
               </View>
-            </Modal>
+            </View>
+          </Modal>
 
           {/* Current Coins */}
           <Text style={styles.title}>Your Coins</Text>
           <Text style={styles.coinAmount}>{coins}</Text>
 
-          {/* Pull Button */}
+          <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 12, gap: 12 }}>
             <TouchableOpacity
-              style={[
-                styles.pullButton,
-                { opacity: coins < 100 || pulling ? 0.5 : 1 },
-              ]}
-              onPress={handlePull}
-              disabled={coins < 100 || pulling}
+              style={[styles.pullButton, { opacity: coins < 100 || singlePulling ? 0.5 : 1 }]}
+              onPress={handleSinglePull}
+              disabled={coins < 100 || singlePulling}
             >
-              <Text style={styles.pullButtonText}>
-                {pulling ? 'Pulling...' : 'PULL (100 coins)'}
-              </Text>
+              <Text style={styles.pullButtonText}>{singlePulling ? 'Pulling...' : '1 PULL (100 coins)'}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.pullButton, { opacity: coins < 1000 || tenPulling ? 0.5 : 1 }]}
+              onPress={handleTenPull}
+              disabled={coins < 1000 || tenPulling}
+            >
+              <Text style={styles.pullButtonText}>{tenPulling ? 'Pulling...' : '10 PULL (1000 coins)'}</Text>
             </TouchableOpacity>
           </View>
             
@@ -419,7 +439,8 @@ export default function ShopScreen() {
             resizeMode="contain"
           />
           
-        </ScrollView>
+        </View>
+      </ScrollView>
 
         {/* Result Modal */}
         <Modal visible={showResult} transparent animationType="fade">
@@ -450,6 +471,7 @@ export default function ShopScreen() {
                  {resultItem?.rarity.toUpperCase()} 
               </Text>
 
+
               <TouchableOpacity
                 style={styles.okButton}
                 onPress={() => setShowResult(false)}
@@ -459,6 +481,36 @@ export default function ShopScreen() {
             </View>
           </View>
         </Modal>
+
+        {/* 10-Pull Result Modal */}
+        <Modal visible={showMultiResult} transparent animationType="fade">
+          <View style={styles.modalBackdrop}>
+            <View style={[styles.resultCard, { borderColor: '#facc15', maxHeight: 400 }]}>
+              <Text style={styles.resultTitle}>10 Pull Results</Text>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {resultItems.map((item, index) => (
+                  <View key={index} style={{ alignItems: 'center', marginHorizontal: 8 }}>
+                    {item.image && (
+                      <Image source={item.image} style={styles.resultImage} resizeMode="contain" />
+                    )}
+                    <Text style={styles.resultName}>{item.name}</Text>
+                    <Text style={[styles.resultRarity, { color: RARITY_COLORS[item.rarity] }]}>
+                      {item.rarity.toUpperCase()}
+                    </Text>
+                  </View>
+                ))}
+              </ScrollView>
+
+              <TouchableOpacity
+                style={styles.okButton}
+                onPress={() => setShowMultiResult(false)}
+              >
+                <Text style={styles.okButtonText}>Claim All</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
       </SafeAreaView>
     </ImageBackground>
   );
@@ -512,14 +564,15 @@ const styles = StyleSheet.create({
   },
   pullButton: {
     backgroundColor: '#ffffffff',
-    paddingVertical: 14,
+    paddingVertical: 15,
     borderRadius: 999,
     alignItems: 'center',
     marginTop: 12,
+    width: 150,
   },
   pullButtonText: {
     color: '#022c22',
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 16,
   },
   modalBackdrop: {
