@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Image, Modal, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { auth } from '../firebaseConfig';
 import { getInventory, InventoryItem, subscribe } from '../inventoryService';
 import { getUserProfile, setEquippedItems, updatePetName } from '../userProfileService';
+import { GACHA_ITEMS, GachaItem } from './shop';
 
 export default function PetScreen() {
   const TOTAL_SLOTS = 12;
@@ -13,6 +14,8 @@ export default function PetScreen() {
   const [editing, setEditing] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalItem, setModalItem] = useState<InventoryItem | null>(null);
 
   useEffect(() => {
     let unsub: (() => void) | undefined;
@@ -62,6 +65,12 @@ export default function PetScreen() {
     slotIndex: i,
     item: inventory[i] ?? null,
   }));
+
+  const getGachaInfo = (item: InventoryItem | null) => {
+    if (!item) return null;
+    // Match by name (or id if you have it)
+    return GACHA_ITEMS.find((gacha: GachaItem) => gacha.name.toLowerCase() === item.name.toLowerCase());
+  };
 
   const filteredSlots = slots.filter(slot => 
   slot.item ? slot.item.name.toLowerCase().includes(searchQuery.toLowerCase()) : true
@@ -264,6 +273,34 @@ export default function PetScreen() {
             />
           </View>
 
+          {modalItem && (
+            <Modal
+              transparent
+              visible={modalVisible}
+              animationType="fade"
+              onRequestClose={() => setModalVisible(false)}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>{modalItem.name}</Text>
+                  <Text style={styles.modalRarity}>
+                    {getGachaInfo(modalItem)?.rarity || 'Unknown Rarity'}
+                  </Text>
+                  <Text style={styles.modalDescription}>
+                    Probability: {getGachaInfo(modalItem)?.probability ?? 'N/A'}%
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.modalCloseButton}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    <Text style={styles.modalCloseText}>Close</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
+          )}
+
+
 
         <FlatList
           data={filteredSlots}
@@ -308,6 +345,12 @@ export default function PetScreen() {
                       }
                     })();
                   }
+                }
+              }}
+              onLongPress={() => {
+                if (item.item) {
+                  setModalItem(item.item);
+                  setModalVisible(true);
                 }
               }}
             >
@@ -503,5 +546,48 @@ const styles = StyleSheet.create({
     height: 60,
     alignSelf: 'center',
     resizeMode: 'contain',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 10,
+  },
+  modalRarity: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  modalCloseButton: {
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  modalCloseText: {
+    color: '#000000ff',
+    fontWeight: '700',
+  },
+  modalDescription: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 20,
   },
 });

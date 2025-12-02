@@ -17,7 +17,7 @@ import { auth, db } from '../firebaseConfig';
 import { addItem, getInventory, subscribe } from '../inventoryService';
 import { updateCoins } from '../userProfileService';
 
-interface GachaItem {
+export type GachaItem = {
   id: number;
   name: string;
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
@@ -25,7 +25,7 @@ interface GachaItem {
   image?: any;
 }
 
-const GACHA_ITEMS: GachaItem[] = [
+export const GACHA_ITEMS: GachaItem[] = [
   { id: 1, name: 'Straw Hat', rarity: 'common', probability: 70, image: require('../../assets/images/accessory/strawhat.png') },
   { id: 2, name: 'Sombrero', rarity: 'common', probability: 70, image: require('../../assets/images/accessory/sombrero.png') },
   { id: 3, name: 'Black Hoodie', rarity: 'rare', probability: 25, image: require('../../assets/images/accessory/hoodie-on.png') },
