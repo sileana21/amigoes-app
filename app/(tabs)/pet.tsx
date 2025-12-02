@@ -12,6 +12,7 @@ export default function PetScreen() {
   const [petName, setPetName] = useState<string>('Sunny');
   const [editing, setEditing] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
     let unsub: (() => void) | undefined;
@@ -61,6 +62,10 @@ export default function PetScreen() {
     slotIndex: i,
     item: inventory[i] ?? null,
   }));
+
+  const filteredSlots = slots.filter(slot => 
+  slot.item ? slot.item.name.toLowerCase().includes(searchQuery.toLowerCase()) : true
+);
 
   // Map inventory item to avatar image
   const getAvatarImage = (item: InventoryItem | null) => {
@@ -242,9 +247,26 @@ export default function PetScreen() {
           </View>
           </View>
 
+          <View style={{ marginVertical: 12 }}>
+            <TextInput
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="Search items..."
+              style={{
+                borderWidth: 1,
+                borderColor: '#ccc',
+                borderRadius: 10,
+                paddingHorizontal: 12,
+                paddingVertical: 8,
+                fontSize: 16,
+                backgroundColor: '#fff',
+              }}
+            />
+          </View>
+
 
         <FlatList
-          data={slots}
+          data={filteredSlots}
           keyExtractor={(it) => String(it.slotIndex)}
           numColumns={3}
           style={styles.grid}
@@ -289,14 +311,17 @@ export default function PetScreen() {
                 }
               }}
             >
-              {item.item && (
+              {item.item ? (
+              <>
                 <Image
                   source={getItemImage(item.item)}
                   style={styles.itemImage}
                   resizeMode="contain"
                 />
-              )}
-            </TouchableOpacity>
+                <Text style={styles.itemName}>{item.item.name}</Text>
+              </>
+            ) : null}
+          </TouchableOpacity>
           )}
         />
       </View>
